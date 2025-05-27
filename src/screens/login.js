@@ -32,7 +32,6 @@ export default function App({ navigation }) {
           placeholderTextColor="#bdbdbd"
           secureTextEntry
         />
-        <Feather name="eye-off" size={20} color="#bdbdbd" style={styles.inputIconRight} />
       </View>
 
       {/* 비밀번호 찾기 */}

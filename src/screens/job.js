@@ -57,7 +57,9 @@ export default function JobSelectionScreen({ navigation }) {
               styles.categoryCard,
               selectedCategory === category.id && styles.selectedCategory
             ]}
-            onPress={() => setSelectedCategory(category.id)}
+            onPress={() => {
+              setSelectedCategory(category.id);
+            }}
           >
             <Feather
               name={category.icon}
@@ -83,7 +85,7 @@ export default function JobSelectionScreen({ navigation }) {
           selectedCategory ? styles.nextButtonActive : styles.nextButtonDisabled
         ]}
         disabled={!selectedCategory}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => navigation.navigate('Test2')}
       >
         <Text style={styles.nextText}>다음</Text>
       </TouchableOpacity>

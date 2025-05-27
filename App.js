@@ -12,6 +12,7 @@ import Job from './src/screens/job';
 import Home from './src/screens/home';
 import Lecture from './src/screens/lecture';
 import Credential from './src/screens/credential';
+import Company from './src/screens/company';
 import { View, Text } from 'react-native';
 
 const Stack = createNativeStackNavigator();
@@ -73,24 +74,9 @@ function TabNavigator() {
       />
       <Tab.Screen 
         name="Job" 
-        component={Job}
+        component={Company}
         options={{ 
-          tabBarLabel: '회사',
-          tabBarButton: () => (
-            <View style={{ 
-              flex: 1, 
-              justifyContent: 'center', 
-              alignItems: 'center',
-              opacity: 0.5 
-            }}>
-              <Ionicons name="business-outline" size={24} color="#9ca3af" />
-              <Text style={{ 
-                fontSize: 12, 
-                color: '#9ca3af',
-                marginTop: 4 
-              }}>회사</Text>
-            </View>
-          )
+          tabBarLabel: '회사'
         }}
       />
     </Tab.Navigator>
@@ -112,6 +98,7 @@ export default function App() {
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Test" component={Test} />
         <Stack.Screen name="Test2" component={Test2} />
+        <Stack.Screen name="Job" component={Job} />
         <Stack.Screen name="MainTabs" component={TabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>

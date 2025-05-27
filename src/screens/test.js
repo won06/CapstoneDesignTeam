@@ -76,7 +76,9 @@ export default function AssessmentScreen({ navigation }) {
             styles.selectButton,
             jobStatus === '있음' && styles.selectedButton
           ]}
-          onPress={() => setJobStatus('있음')}
+          onPress={() => {
+            setJobStatus('있음');
+          }}
         >
           <Text
             style={[
@@ -109,10 +111,16 @@ export default function AssessmentScreen({ navigation }) {
       <TouchableOpacity
         style={[
           styles.nextButton,
-          grade && jobStatus ? styles.nextButtonActive : styles.nextButtonDisabled
+          grade ? styles.nextButtonActive : styles.nextButtonDisabled
         ]}
-        disabled={!(grade && jobStatus)}
-        onPress={() => navigation.navigate('Test2')}
+        disabled={!grade}
+        onPress={() => {
+          if (jobStatus === '있음') {
+            navigation.navigate('Job');
+          } else {
+            navigation.navigate('Test2');
+          }
+        }}
       >
         <Text style={styles.nextText}>다음</Text>
       </TouchableOpacity>
