@@ -26,8 +26,11 @@ const categories = [
   { title: '진로·창업·캡스톤·실습', courses: ['진로탐색과꿈-설계', '취업·창업과꿈-설계', '벤처캡스톤디자인', '현장실습'] },
 ];
 
-export default function CourseSelectionScreen({ navigation }) {
+export default function CourseSelectionScreen({ navigation, route }) {
   const [selectedCourses, setSelectedCourses] = useState([]);
+
+  // 진입 경로 정보 받기
+  const fromJob12 = route?.params?.fromJob12;
 
   const toggleCourse = (course) => {
     setSelectedCourses((prev) =>

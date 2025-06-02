@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
+import Logo from '../components/Logo';
 
 const semesters = [
   '1학년\n1학기',
@@ -71,8 +72,10 @@ export default function LectureScreen({ navigation }) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.logo}>Eoyeongbujeong</Text>
-        <Ionicons name="settings-outline" size={20} color="#111" />
+        <Logo />
+        <TouchableOpacity onPress={() => navigation.navigate('Setting')}>
+          <Ionicons name="settings-outline" size={20} color="#111" />
+        </TouchableOpacity>
       </View>
 
       {/* Page Title */}

@@ -9,6 +9,8 @@ import {
   FlatList,
   Pressable
 } from 'react-native';
+import Logo from '../components/Logo';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function AssessmentScreen({ navigation }) {
   const [grade, setGrade] = useState('');
@@ -19,9 +21,12 @@ export default function AssessmentScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* 로고와 닫기 아이콘 */}
+      {/* 로고와 뒤로가기/닫기 아이콘 */}
       <View style={styles.header}>
-        <Text style={styles.logo}>eoyeongbujeong</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 8 }}>
+          <Ionicons name="arrow-back" size={24} color="#222" />
+        </TouchableOpacity>
+        <Logo />
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <Text style={styles.closeIcon}>✕</Text>
         </TouchableOpacity>
@@ -111,18 +116,23 @@ export default function AssessmentScreen({ navigation }) {
       <TouchableOpacity
         style={[
           styles.nextButton,
-          grade ? styles.nextButtonActive : styles.nextButtonDisabled
+          grade && jobStatus ? styles.nextButtonActive : styles.nextButtonDisabled
         ]}
-        disabled={!grade}
+        disabled={!grade || !jobStatus}
         onPress={() => {
-          if (jobStatus === '있음') {
-            navigation.navigate('Job');
+          if ((grade === '1학년' || grade === '2학년') && jobStatus === '없음') {
+            navigation.navigate('Job12');
+          } else if (jobStatus === '있음') {
+            navigation.navigate('Test2', { fromJob12: false });
           } else {
-            navigation.navigate('Test2');
+            navigation.navigate('Test2', { fromJob12: false });
           }
         }}
       >
-        <Text style={styles.nextText}>다음</Text>
+        <Text style={[
+          styles.nextText,
+          (!grade || !jobStatus) && styles.nextTextDisabled
+        ]}>다음</Text>
       </TouchableOpacity>
     </View>
   );
@@ -131,7 +141,6 @@ export default function AssessmentScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 24 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  logo: { fontSize: 24, fontWeight: 'bold', color: '#3b82f6' },
   closeIcon: { fontSize: 20, color: '#6b7280' },
 
   title: { fontSize: 20, fontWeight: 'bold', marginTop: 24 },
@@ -193,7 +202,8 @@ const styles = StyleSheet.create({
   nextButton: {
     marginTop: 40,
     borderRadius: 8,
-    paddingVertical: 14
+    paddingVertical: 14,
+    backgroundColor: '#d1d5db'
   },
   nextButtonDisabled: {
     backgroundColor: '#d1d5db'
@@ -206,5 +216,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600'
+  },
+  nextTextDisabled: {
+    color: '#9ca3af'
   }
 });

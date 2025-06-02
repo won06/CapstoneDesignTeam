@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import Logo from '../components/Logo';
-import { Ionicons } from '@expo/vector-icons';
 
 const jobCategories = [
   { id: '1', title: 'AI 엔지니어', icon: 'cpu' },
@@ -20,7 +19,7 @@ const jobCategories = [
   { id: '6', title: '기타', icon: 'more-horizontal' },
 ];
 
-export default function JobSelectionScreen({ navigation }) {
+export default function Job1Screen({ navigation }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -28,9 +27,6 @@ export default function JobSelectionScreen({ navigation }) {
     <View style={styles.container}>
       {/* 상단 바 */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 8 }}>
-          <Ionicons name="arrow-back" size={24} color="#222" />
-        </TouchableOpacity>
         <Logo />
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Feather name="x" size={24} color="#222" />
@@ -102,19 +98,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 60,
-    paddingHorizontal: 20,
+    padding: 20,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginTop: 60,
+    marginBottom: 20,
   },
   logo: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#3b82f6',
   },
   title: {
     fontSize: 24,
@@ -122,7 +117,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#6b7280',
     marginBottom: 24,
   },
@@ -130,18 +125,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 24,
-    height: 48,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginBottom: 20,
   },
   searchIcon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
+    height: 40,
     fontSize: 16,
-    color: '#1f2937',
   },
   categoriesContainer: {
     flex: 1,
@@ -149,34 +143,32 @@ const styles = StyleSheet.create({
   categoryCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     padding: 16,
+    backgroundColor: '#f9fafb',
     borderRadius: 12,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
   },
   selectedCategory: {
     backgroundColor: '#eff6ff',
     borderColor: '#3b82f6',
+    borderWidth: 1,
   },
   categoryTitle: {
-    fontSize: 16,
     marginLeft: 12,
-    color: '#1f2937',
+    fontSize: 16,
+    color: '#374151',
   },
   selectedCategoryText: {
     color: '#3b82f6',
     fontWeight: '600',
   },
   nextButton: {
-    marginTop: 24,
-    marginBottom: 24,
+    padding: 16,
     borderRadius: 12,
-    paddingVertical: 16,
+    marginTop: 20,
   },
   nextButtonDisabled: {
-    backgroundColor: '#d1d5db',
+    backgroundColor: '#e5e7eb',
   },
   nextButtonActive: {
     backgroundColor: '#3b82f6',
@@ -187,4 +179,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-});
+}); 

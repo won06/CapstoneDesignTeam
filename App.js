@@ -9,11 +9,12 @@ import SignUp from './src/screens/signup';
 import Test from './src/screens/test';
 import Test2 from './src/screens/test2';
 import Job from './src/screens/job';
+import Job12 from './src/screens/job12';
 import Home from './src/screens/home';
 import Lecture from './src/screens/lecture';
 import Credential from './src/screens/credential';
 import Company from './src/screens/company';
-import { View, Text } from 'react-native';
+import Setting from './src/screens/setting';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -92,6 +93,7 @@ export default function App() {
           headerShown: false,
           gestureEnabled: true,
           cardOverlayEnabled: true,
+          animation: 'slide_from_right',
         }}
       >
         <Stack.Screen name="Login" component={Login} />
@@ -99,7 +101,15 @@ export default function App() {
         <Stack.Screen name="Test" component={Test} />
         <Stack.Screen name="Test2" component={Test2} />
         <Stack.Screen name="Job" component={Job} />
+        <Stack.Screen 
+          name="Job12" 
+          component={Job12}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
         <Stack.Screen name="MainTabs" component={TabNavigator} />
+        <Stack.Screen name="Setting" component={Setting} />
       </Stack.Navigator>
     </NavigationContainer>
   );

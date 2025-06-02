@@ -1,12 +1,13 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Linking, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Linking, Alert, Image } from 'react-native';
 import { FontAwesome, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
+import Logo from '../components/Logo';
 
 export default function App({ navigation }) {
   return (
     <View style={styles.container}>
       {/* 로고 */}
-      <Text style={styles.logo}>eoyeongbujeong</Text>
+      <Logo style={{ marginBottom: 32 }} />
 
       {/* 로그인 폼 */}
       <Text style={styles.loginTitle}>로그인</Text>

@@ -9,6 +9,8 @@ import {
   FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import Logo from '../components/Logo';
 
 const jobData = {
   smes: [
@@ -50,6 +52,8 @@ const jobData = {
 };
 
 export default function CompanyJobsScreen() {
+  const navigation = useNavigation();
+
   const renderJobCard = (item) => (
     <View style={styles.jobCard}>
       <Image source={item.image} style={styles.jobImage} />
@@ -71,12 +75,10 @@ export default function CompanyJobsScreen() {
     <View style={styles.container}>
       {/* 헤더 */}
       <View style={styles.header}>
-        <Text style={styles.logo}>Eoyeongbujeong</Text>
-        <View style={styles.headerIcons}>
-          <Ionicons name="search-outline" size={20} color="#111" />
-          <Ionicons name="notifications-outline" size={20} color="#111" style={{ marginLeft: 12 }} />
-          <Ionicons name="settings-outline" size={20} color="#111" style={{ marginLeft: 12 }} />
-        </View>
+        <Logo />
+        <TouchableOpacity onPress={() => navigation.navigate('Setting')} style={styles.headerIcons}>
+          <Ionicons name="settings-outline" size={20} color="#111" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
@@ -137,12 +139,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
     alignItems: 'center',
-  },
-  logo: {
-    fontSize: 20,
-    color: '#3b82f6',
-    fontWeight: 'bold',
-    fontFamily: 'cursive',
   },
   headerIcons: { flexDirection: 'row' },
 

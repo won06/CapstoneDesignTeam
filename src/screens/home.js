@@ -10,6 +10,7 @@ import {
   Pressable
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
+import Logo from '../components/Logo';
 
 const careers = [
   {
@@ -96,8 +97,10 @@ export default function CareerRecommendationScreen({ navigation }) {
     <View style={styles.container}>
       {/* 상단 바 */}
       <View style={styles.header}>
-        <Text style={styles.logo}>eoyeongbujeong</Text>
-        <Feather name="settings" size={20} color="#222" />
+        <Logo />
+        <TouchableOpacity onPress={() => navigation.navigate('Setting')}>
+          <Feather name="settings" size={20} color="#222" />
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.title}>경력 추천</Text>
