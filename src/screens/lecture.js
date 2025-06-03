@@ -10,17 +10,6 @@ import {
 import { Ionicons, Feather } from '@expo/vector-icons';
 import Logo from '../components/Logo';
 
-const semesters = [
-  '1학년\n1학기',
-  '1학년\n2학기',
-  '2학년\n1학기',
-  '2학년\n2학기',
-  '3학년\n1학기',
-  '3학년\n2학기',
-  '4학년\n1학기',
-  '4학년\n2학기',
-];
-
 const recommendedCourses = [
   {
     id: '1',
@@ -88,20 +77,7 @@ export default function LectureScreen({ navigation }) {
         style={{ marginBottom: 20 }}
         contentContainerStyle={{ paddingHorizontal: 10 }}
       >
-        {semesters.map((sem) => {
-          const selected = sem === selectedSemester;
-          return (
-            <TouchableOpacity
-              key={sem}
-              style={[styles.semBtn, selected && styles.semBtnSelected]}
-              onPress={() => setSelectedSemester(sem)}
-            >
-              <Text style={[styles.semText, selected && styles.semTextSelected]} numberOfLines={2}>
-                {sem}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+        {/* semesters 배열 제거 */}
       </ScrollView>
 
       {/* 추천 강의 */}

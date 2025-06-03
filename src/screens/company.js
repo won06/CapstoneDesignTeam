@@ -86,9 +86,6 @@ export default function CompanyJobsScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>중소기업 채용정보</Text>
-            <TouchableOpacity>
-              <Text style={styles.link}>전체보기</Text>
-            </TouchableOpacity>
           </View>
           <FlatList
             data={jobData.smes}
@@ -103,9 +100,6 @@ export default function CompanyJobsScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>대기업 채용정보</Text>
-            <TouchableOpacity>
-              <Text style={styles.link}>전체보기</Text>
-            </TouchableOpacity>
           </View>
           <FlatList
             data={jobData.large}
