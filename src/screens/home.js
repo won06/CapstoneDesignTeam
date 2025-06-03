@@ -103,9 +103,9 @@ export default function CareerRecommendationScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.title}>경력 추천</Text>
+      <Text style={styles.title}>직업 추천</Text>
       <Text style={styles.subtitle}>
-        귀하의 기술과 관심사를 바탕으로 최적의 경력 경로를 추천해드립니다.
+        기술과 관심사를 바탕으로 최적의 직업 경로를 추천해드립니다.
       </Text>
 
       {/* 경력 리스트 */}

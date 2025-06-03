@@ -90,7 +90,7 @@ export default function JobSelectionScreen({ navigation }) {
           selectedCategory ? styles.nextButtonActive : styles.nextButtonDisabled
         ]}
         disabled={!selectedCategory}
-        onPress={() => navigation.navigate('Test2')}
+        onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
       >
         <Text style={styles.nextText}>다음</Text>
       </TouchableOpacity>

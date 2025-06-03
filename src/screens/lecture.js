@@ -68,17 +68,10 @@ export default function LectureScreen({ navigation }) {
       </View>
 
       {/* Page Title */}
-      <Text style={styles.pageTitle}>강의</Text>
+      {/* <Text style={styles.pageTitle}>강의</Text>  // 삭제 */}
 
-      {/* 학기 선택 */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ marginBottom: 20 }}
-        contentContainerStyle={{ paddingHorizontal: 10 }}
-      >
-        {/* semesters 배열 제거 */}
-      </ScrollView>
+      {/* 학기 선택 스크롤뷰 삭제 */}
+      {/* <ScrollView ...> ... </ScrollView> */}
 
       {/* 추천 강의 */}
       <Text style={styles.sectionTitle}>추천강의</Text>
@@ -89,7 +82,14 @@ export default function LectureScreen({ navigation }) {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.courseTitle}>{item.title}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                <Text style={styles.courseTitle}>{item.title}</Text>
+                {item.status && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{item.status}</Text>
+                  </View>
+                )}
+              </View>
               <TouchableOpacity onPress={() => toggleBookmark(item.id)}>
                 {item.bookmarked ? (
                   <Ionicons name="bookmark" size={20} color="#2563eb" />
@@ -98,16 +98,10 @@ export default function LectureScreen({ navigation }) {
                 )}
               </TouchableOpacity>
             </View>
-
-            <View style={styles.courseMeta}>
-              <Text style={styles.courseType}>{item.type}</Text>
-              {item.status && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{item.status}</Text>
-                </View>
-              )}
-            </View>
-
+            <Text style={[
+              styles.courseType,
+              item.type === '필수과목' ? styles.courseTypeRequired : styles.courseTypeOptional,
+            ]}>{item.type}</Text>
             <Text style={styles.prereq}>
               선수과목: {item.prereqs.join(', ')}
             </Text>
@@ -119,11 +113,12 @@ export default function LectureScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingTop: 60 },
+  container: { flex: 1, backgroundColor: '#fff' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
+    marginTop: 40,
     marginBottom: 8,
     alignItems: 'center',
   },
@@ -179,42 +174,50 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: '#e5e7eb',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 3,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 4,
   },
   courseTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  courseMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  courseType: {
-    fontSize: 13,
-    color: '#3b82f6',
     marginRight: 8,
   },
   badge: {
-    backgroundColor: '#e0f2fe',
-    paddingHorizontal: 8,
+    backgroundColor: '#e0edff',
+    borderRadius: 12,
+    paddingHorizontal: 10,
     paddingVertical: 2,
-    borderRadius: 10,
+    marginLeft: 6,
   },
   badgeText: {
     fontSize: 12,
     color: '#2563eb',
+    fontWeight: 'bold',
+  },
+  courseType: {
+    fontSize: 13,
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  courseTypeRequired: {
+    color: '#2563eb',
+    fontWeight: 'bold',
+  },
+  courseTypeOptional: {
+    color: '#6b7280',
+    fontWeight: 'bold',
   },
   prereq: {
     fontSize: 13,
     color: '#6b7280',
+    marginTop: 2,
   },
 });

@@ -11,8 +11,8 @@ import Logo from '../components/Logo';
 import { Ionicons } from '@expo/vector-icons';
 
 const interests = [
-  { title: '개론', items: ['전자AI시스템공학개론'] },
-  { title: '수학·통계', items: ['전공기초수학', 'AI융합기초수학', '공업수학', '확률및통계', '확률과인공지능'] },
+  { title: '개론', items: ['전자AI시스템공학개론','AI소프트웨어개론'] },
+  { title: '수학·통계', items: ['전공기초수학', 'AI융합기초수학','AI응용수학', '공업수학', '확률및통계', '확률과인공지능'] },
   { title: '기초전자·물리 실험', items: ['전자기학1', '전자기학2', '물리전자', '기초회로실험', '기초전기및실험', '전자회로실험1', '전자회로실험2'] },
   { title: '회로·디지털공학', items: ['회로이론1', '회로이론2', '디지털공학1', '디지털공학2', '디지털회로및실험', '디지털회로응용및실험'] },
   { title: '제어·로봇·자율시스템', items: ['제어공학1', '제어공학2', '제어공학및실험', '제어공학응용및실험', '전동기제어', '마이크로프로세서', '마이크로프로세서설계', 'ROS로봇프로그래밍', '로봇공학', 'AI자율주행탱크설계', 'PLC'] },
@@ -95,7 +95,7 @@ export default function Job12({ navigation }) {
             selectedInterests.length > 0 ? styles.nextButtonActive : styles.nextButtonDisabled,
           ]}
           disabled={selectedInterests.length === 0}
-          onPress={() => navigation.navigate('Test2', { fromJob12: true })}
+          onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
         >
           <Text style={styles.nextText}>다음</Text>
         </TouchableOpacity>
