@@ -44,7 +44,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: '비밀번호가 일치하지 않습니다.' });
     }
     const token = jwt.sign({ user_id: user.user_id, name: user.name }, 'jwt-secret-key', { expiresIn: '1h' });
-    res.json({ message: '로그인 성공', token, is_test_completed: user.is_test_completed });
+    const is_test_completed = (user.is_test_completed === undefined || user.is_test_completed === null || user.is_test_completed === '') ? 0 : user.is_test_completed;
+    res.json({ message: '로그인 성공', token, is_test_completed });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: '서버 오류' });

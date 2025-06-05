@@ -36,7 +36,7 @@ export default function App({ navigation }) {
       if (res.ok) {
         // 로그인 성공
         await AsyncStorage.setItem('user_id', email);
-        if (data.is_test_completed === 0) {
+        if (String(data.is_test_completed) === '0') {
           navigation.navigate('Test'); // 적성검사 화면
         } else {
           navigation.navigate('MainTabs'); // 메인화면
