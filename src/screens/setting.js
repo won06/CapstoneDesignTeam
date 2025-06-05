@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Button, Platform } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -9,9 +10,30 @@ export default function SettingScreen({ navigation }) {
     setModalVisible(true);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setModalVisible(false);
-    navigation.navigate('Login');
+    try {
+      const user_id = await AsyncStorage.getItem('user_id');
+      if (!user_id) {
+        Alert.alert('오류', '로그인 정보가 없습니다.');
+        return;
+      }
+      const res = await fetch('http://192.168.45.78:3001/api/user/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Alert.alert('탈퇴 완료', '회원 탈퇴가 완료되었습니다.');
+        await AsyncStorage.removeItem('user_id');
+        navigation.navigate('Login');
+      } else {
+        Alert.alert('탈퇴 실패', data.message || '탈퇴에 실패했습니다.');
+      }
+    } catch (err) {
+      Alert.alert('에러', '네트워크 오류 또는 서버 오류가 발생했습니다.');
+    }
   };
 
   const handleCancel = () => {

@@ -1,10 +1,53 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Linking, Alert, Image } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Linking, Alert, Image, Platform } from 'react-native';
 import { FontAwesome, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
 import Logo from '../components/Logo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  function showAlert(title, message) {
+    if (Platform.OS === 'web') {
+      window.alert(`${title}\n${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  }
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      showAlert('입력 오류', '이메일과 비밀번호를 모두 입력하세요.');
+      return;
+    }
+    try {
+      // 서버 주소는 실제 PC의 IP로 변경 필요
+      const res = await fetch('http://192.168.45.78:3001/api/user/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: email,
+          password
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        // 로그인 성공
+        await AsyncStorage.setItem('user_id', email);
+        if (data.is_test_completed === 0) {
+          navigation.navigate('Test'); // 적성검사 화면
+        } else {
+          navigation.navigate('MainTabs'); // 메인화면
+        }
+      } else {
+        showAlert('로그인 실패', data.message || '로그인에 실패했습니다.');
+      }
+    } catch (err) {
+      showAlert('에러', '네트워크 오류 또는 서버 오류가 발생했습니다.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -23,6 +66,10 @@ export default function App({ navigation }) {
           placeholder="이메일 주소"
           placeholderTextColor="#bdbdbd"
           keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          returnKeyType="done"
+          onSubmitEditing={() => {}}
         />
       </View>
 
@@ -34,6 +81,10 @@ export default function App({ navigation }) {
           placeholder="비밀번호"
           placeholderTextColor="#bdbdbd"
           secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
+          returnKeyType="done"
+          onSubmitEditing={() => {}}
         />
         <TouchableOpacity onPress={() => setShowPassword((prev) => !prev)}>
           <Feather
@@ -48,7 +99,7 @@ export default function App({ navigation }) {
       {/* 로그인 버튼 */}
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={() => navigation.navigate('Test')}
+        onPress={handleLogin}
       >
         <Text style={styles.loginButtonText}>로그인</Text>
       </TouchableOpacity>

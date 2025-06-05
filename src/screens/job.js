@@ -10,6 +10,7 @@ import {
 import { Feather } from '@expo/vector-icons';
 import Logo from '../components/Logo';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const jobCategories = [
   { id: '1', title: 'AI 엔지니어', icon: 'cpu' },
@@ -23,6 +24,18 @@ const jobCategories = [
 export default function JobSelectionScreen({ navigation }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleCompleteTest = async () => {
+    const user_id = await AsyncStorage.getItem('user_id');
+    try {
+      await fetch('http://192.168.45.78:3001/api/user/complete-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id }),
+      });
+    } catch (e) {}
+    navigation.navigate('MainTabs');
+  };
 
   return (
     <View style={styles.container}>
@@ -90,7 +103,7 @@ export default function JobSelectionScreen({ navigation }) {
           selectedCategory ? styles.nextButtonActive : styles.nextButtonDisabled
         ]}
         disabled={!selectedCategory}
-        onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
+        onPress={handleCompleteTest}
       >
         <Text style={styles.nextText}>다음</Text>
       </TouchableOpacity>
