@@ -45,7 +45,7 @@ export default function SignupScreen({ navigation }) {
     }
     try {
       // 회원가입 요청
-      const registerRes = await fetch('http://192.168.45.78:3001/api/user/register', {
+      const registerRes = await fetch('http://192.168.4.236:3001/api/user/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

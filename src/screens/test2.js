@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
   SafeAreaView,
   Platform,
 } from 'react-native';
@@ -29,20 +29,39 @@ const categories = [
 
 export default function CourseSelectionScreen({ navigation, route }) {
   const [selectedCourses, setSelectedCourses] = useState([]);
-
-  // 진입 경로 정보 받기
   const fromJob = route?.params?.fromJob;
   const fromJob12 = route?.params?.fromJob12;
 
-  const toggleCourse = (course) => {
+  const toggleCourse = useCallback((course) => {
     setSelectedCourses((prev) =>
       prev.includes(course) ? prev.filter((c) => c !== course) : [...prev, course]
     );
-  };
+  }, []);
+
+  const renderCategory = useCallback(({ item: category }) => (
+    <View style={{ marginTop: 24 }}>
+      <Text style={styles.category}>{category.title}</Text>
+      <View style={styles.courseGrid}>
+        {category.courses.map((course) => {
+          const selected = selectedCourses.includes(course);
+          return (
+            <TouchableOpacity
+              key={course}
+              style={[styles.courseBtn, selected && styles.courseBtnSelected]}
+              onPress={() => toggleCourse(course)}
+            >
+              <Text style={[styles.courseText, selected && styles.courseTextSelected]}>
+                {course}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  ), [selectedCourses, toggleCourse]);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.navigate('Test')} style={{ marginRight: 8 }}>
           <Ionicons name="chevron-back" size={24} color="#111" />
@@ -53,57 +72,29 @@ export default function CourseSelectionScreen({ navigation, route }) {
         </TouchableOpacity>
       </View>
 
-      {/* Scroll 영역 */}
-      <ScrollView
-        style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={true} // ← 마우스 휠 작동 위해 필요
-      >
+      <View style={styles.content}>
         <Text style={styles.title}>어떤 수업을 들었나요?</Text>
         <Text style={styles.subtitle}>
           직업과 관련된 수업을 모두 선택해주세요. 여러 개 선택할 수 있어요.
         </Text>
 
-        {categories.map((cat) => (
-          <View key={cat.title} style={{ marginTop: 24 }}>
-            <Text style={styles.category}>{cat.title}</Text>
-            <View style={styles.courseGrid}>
-              {cat.courses.map((course) => {
-                const selected = selectedCourses.includes(course);
-                return (
-                  <TouchableOpacity
-                    key={course}
-                    style={[
-                      styles.courseBtn,
-                      selected && styles.courseBtnSelected,
-                    ]}
-                    onPress={() => toggleCourse(course)}
-                  >
-                    <Text
-                      style={[
-                        styles.courseText,
-                        selected && styles.courseTextSelected,
-                      ]}
-                    >
-                      {course}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+        <FlatList
+          data={categories}
+          renderItem={renderCategory}
+          keyExtractor={(item) => item.title}
+          showsVerticalScrollIndicator={true}
+          contentContainerStyle={styles.scrollContent}
+          initialNumToRender={5}
+          maxToRenderPerBatch={5}
+          windowSize={5}
+        />
+      </View>
 
-      {/* 하단 버튼 */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
             styles.nextBtn,
-            selectedCourses.length > 0
-              ? styles.nextBtnActive
-              : styles.nextBtnDisabled,
+            selectedCourses.length > 0 ? styles.nextBtnActive : styles.nextBtnDisabled,
           ]}
           disabled={selectedCourses.length === 0}
           onPress={() => {
@@ -200,5 +191,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  scrollContent: {
+    paddingBottom: 100,
   },
 });

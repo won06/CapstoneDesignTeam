@@ -24,7 +24,7 @@ export default function App({ navigation }) {
     }
     try {
       // 서버 주소는 실제 PC의 IP로 변경 필요
-      const res = await fetch('http://192.168.45.78:3001/api/user/login', {
+      const res = await fetch('http://192.168.4.236:3001/api/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
