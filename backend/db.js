@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: 'ahnyuri4900!',
+  password: 'dlrbgus123@',
   database: 'capstone_test_db2',
   waitForConnections: true,
   connectionLimit: 10,

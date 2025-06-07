@@ -28,7 +28,7 @@ export default function JobSelectionScreen({ navigation }) {
   const handleCompleteTest = async () => {
     const user_id = await AsyncStorage.getItem('user_id');
     try {
-      await fetch('http://192.168.4.236:3001/api/user/complete-test', {
+      await fetch('http://192.168.45.78:3001/api/user/complete-test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id }),

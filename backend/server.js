@@ -20,7 +20,7 @@ app.use('/api/user', userRouter);
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: 'ahnyuri4900!',
+  password: 'dlrbgus123@',
   database: 'capstone_test_db2',
   waitForConnections: true,
   connectionLimit: 10,
