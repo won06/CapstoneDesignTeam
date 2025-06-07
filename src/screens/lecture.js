@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import Logo from '../components/Logo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const recommendedCourses = [
   {
@@ -33,10 +34,25 @@ const recommendedCourses = [
   },
 ];
 
+// 과목명에서 괄호와 괄호 안 영어 제거 함수
+const getKoreanTitle = (title) => title ? title.replace(/\s*\([^)]*\)/g, '').trim() : '';
+
 export default function LectureScreen({ navigation }) {
   const [selectedSemester, setSelectedSemester] = useState('2학년 1학기');
-  const [courses, setCourses] = useState(recommendedCourses);
+  const [courses, setCourses] = useState([]);
   const [selectedTab, setSelectedTab] = useState('강의');
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      const user_id = await AsyncStorage.getItem('user_id');
+      if (!user_id) return;
+      const res = await fetch(`http://192.168.45.78:3001/api/recommend/result?user_id=${user_id}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setCourses(data.courses || []);
+    };
+    fetchCourses();
+  }, []);
 
   const handleTabPress = (tab) => {
     setSelectedTab(tab);
@@ -57,36 +73,42 @@ export default function LectureScreen({ navigation }) {
       </View>
 
       {/* Page Title */}
-      {/* <Text style={styles.pageTitle}>강의</Text>  // 삭제 */}
+      <Text style={styles.pageTitle}>강의</Text>
+      <Text style={styles.subtitle}>
+        AI/소프트웨어 분야에서 추천하는 강의 목록입니다.
+      </Text>
 
-      {/* 학기 선택 스크롤뷰 삭제 */}
-      {/* <ScrollView ...> ... </ScrollView> */}
-
-      {/* 추천 강의 */}
-      <Text style={styles.sectionTitle}>추천강의</Text>
+      {/* 강의 리스트 */}
       <FlatList
         data={courses}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        keyExtractor={(item) => (item.course_id ? item.course_id.toString() : (item.id ? item.id.toString() : Math.random().toString()))}
+        contentContainerStyle={{ paddingBottom: 80 }}
+        style={{ flex: 1, marginBottom: 64 }}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                <Text style={styles.courseTitle}>{item.title}</Text>
-                {item.status && (
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{item.status}</Text>
-                  </View>
-                )}
-              </View>
+              <Ionicons name="book" size={28} color="#60a5fa" />
+              <Feather name="star" size={20} color="#ccc" />
             </View>
-            <Text style={[
-              styles.courseType,
-              item.type === '필수과목' ? styles.courseTypeRequired : styles.courseTypeOptional,
-            ]}>{item.type}</Text>
-            <Text style={styles.prereq}>
-              선수과목: {item.prereqs.join(', ')}
-            </Text>
+            <Text style={styles.cardTitle}>{getKoreanTitle(item.title || item.course_name)}</Text>
+            <Text style={styles.organization}>{item.type}</Text>
+            <Text style={styles.cardDesc}>{item.description || ''}</Text>
+            <View style={styles.tagsContainer}>
+              {/* 선수과목 태그 스타일로 표시 */}
+              {Array.isArray(item.prereqs) && item.prereqs.length > 0 && (
+                <View style={styles.prereqTagContainer}>
+                  <Text style={styles.prereqLabel}>선수과목:</Text>
+                  <View style={styles.prereqTagRow}>
+                    {item.prereqs.map((prereq, idx) => (
+                      <View key={idx} style={styles.prereqTag}>
+                        <Text style={styles.prereqTagText}>{prereq}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+            </View>
           </View>
         )}
       />
@@ -95,111 +117,109 @@ export default function LectureScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 80,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginTop: 40,
-    marginBottom: 8,
     alignItems: 'center',
+    marginBottom: 16,
   },
   logo: {
     fontSize: 20,
-    fontFamily: 'cursive',
-    color: '#3b82f6',
     fontWeight: 'bold',
+    color: '#3b82f6',
   },
   pageTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
-    paddingHorizontal: 20,
+    marginBottom: 4,
   },
-  semBtn: {
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 36,
-    width: 72,
-    height: 72,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-    backgroundColor: '#fff',
-  },
-  semBtnSelected: {
-    borderColor: '#2563eb',
-    backgroundColor: '#f0f6ff',
-  },
-  semText: {
+  subtitle: {
     fontSize: 13,
-    color: '#222',
-    fontWeight: 'normal',
-    textAlign: 'center',
-  },
-  semTextSelected: {
-    color: '#2563eb',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    paddingHorizontal: 20,
-    marginBottom: 12,
+    color: '#6b7280',
+    marginBottom: 16,
   },
   card: {
     backgroundColor: '#fff',
-    marginHorizontal: 20,
-    marginBottom: 16,
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
+    marginBottom: 16,
     borderColor: '#e5e7eb',
-    shadowColor: 'transparent',
-    shadowOpacity: 0,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 0,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 4,
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  courseTitle: {
+  cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginRight: 8,
+    marginBottom: 4,
   },
-  badge: {
+  organization: {
+    fontSize: 13,
+    color: '#4b5563',
+    marginBottom: 4,
+  },
+  cardDesc: {
+    fontSize: 13,
+    color: '#4b5563',
+    marginBottom: 8,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  tag: {
+    backgroundColor: '#eff6ff',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
+    marginRight: 6,
+    marginBottom: 6,
+  },
+  tagText: {
+    fontSize: 12,
+    color: '#2563eb',
+  },
+  prereqTagContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    marginTop: 4,
+  },
+  prereqLabel: {
+    fontSize: 13,
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  prereqTagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  prereqTag: {
     backgroundColor: '#e0edff',
     borderRadius: 12,
     paddingHorizontal: 10,
-    paddingVertical: 2,
-    marginLeft: 6,
+    paddingVertical: 4,
+    marginRight: 6,
+    marginBottom: 4,
   },
-  badgeText: {
-    fontSize: 12,
+  prereqTagText: {
+    fontSize: 13,
     color: '#2563eb',
     fontWeight: 'bold',
-  },
-  courseType: {
-    fontSize: 13,
-    marginTop: 2,
-    marginBottom: 2,
-  },
-  courseTypeRequired: {
-    color: '#2563eb',
-    fontWeight: 'bold',
-  },
-  courseTypeOptional: {
-    color: '#6b7280',
-    fontWeight: 'bold',
-  },
-  prereq: {
-    fontSize: 13,
-    color: '#6b7280',
-    marginTop: 2,
   },
 });

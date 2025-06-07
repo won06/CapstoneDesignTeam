@@ -11,6 +11,9 @@ import {
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import Logo from '../components/Logo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FIELD_MAP } from '../fields';
+import { COURSE_MAP } from '../courses';
 
 const API_URL = 'http://192.168.45.78:3001/api';
 
@@ -18,21 +21,37 @@ export default function CareerRecommendationScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCareer, setSelectedCareer] = useState(null);
   const [careers, setCareers] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchCareers();
+    fetchRecommendedCareers();
   }, []);
 
-  const fetchCareers = async () => {
+  const fetchRecommendedCareers = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/careers`);
+      const user_id = await AsyncStorage.getItem('user_id');
+      if (!user_id) throw new Error('로그인 정보가 없습니다.');
+
+      // 1. 추천 생성(최초 1회만 필요, 이미 생성된 경우 생략 가능)
+      await fetch(`${API_URL}/recommend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id }),
+      });
+
+      // 2. 추천 결과 조회
+      const response = await fetch(`${API_URL}/recommend/result?user_id=${user_id}`);
       if (!response.ok) {
-        throw new Error('데이터를 불러오는데 실패했습니다.');
+        throw new Error('추천 결과를 불러오는데 실패했습니다.');
       }
       const data = await response.json();
-      setCareers(data);
+      setCareers(data.careers || []);
+      // 강의 추천 관련 UI 및 상태 제거
+      // setCourses(data.courses || []); // courses 상태 제거
+      // 강의 추천 FlatList 및 텍스트 제거
       setLoading(false);
     } catch (err) {
       setError(err.message);

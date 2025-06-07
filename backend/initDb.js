@@ -18,9 +18,9 @@ async function initializeDatabase() {
           '연봉 1억2천 ~ 1억8천'
         ]
       );
-      console.log('샘플 데이터가 추가되었습니다.');
+      // console.log('샘플 데이터가 추가되었습니다.');
     } else {
-      console.log('이미 데이터가 존재합니다.');
+      // console.log('이미 데이터가 존재합니다.');
     }
     process.exit(0);
   } catch (error) {

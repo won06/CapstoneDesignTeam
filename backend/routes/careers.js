@@ -5,7 +5,7 @@ const pool = require('../db');
 // 모든 직업 목록 조회
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT career_id, jobdic_seq, job_name, summary, salary FROM careers');
+    const [rows] = await pool.query('SELECT career_id, jobdic_seq, job_name, summary, salary FROM careers WHERE career_id IN (SELECT careers_career_id FROM courses_careers)');
     res.json(rows);
   } catch (error) {
     console.error('직업 목록 조회 실패:', error);

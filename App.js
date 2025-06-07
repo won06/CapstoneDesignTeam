@@ -7,14 +7,14 @@ import { Ionicons } from '@expo/vector-icons';
 import Login from './src/screens/login';
 import SignUp from './src/screens/signup';
 import Test from './src/screens/test';
-import Test2 from './src/screens/test2';
-import Job from './src/screens/job';
 import Job12 from './src/screens/job12';
 import Home from './src/screens/home';
 import Lecture from './src/screens/lecture';
 import Credential from './src/screens/credential';
 import Company from './src/screens/company';
 import Setting from './src/screens/setting';
+import SelectJobScreen from './src/screens/SelectJobScreen';
+import Test2 from './src/screens/test2';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -32,7 +32,7 @@ function TabNavigator() {
             iconName = focused ? 'book' : 'book-outline';
           } else if (route.name === 'Credential') {
             iconName = focused ? 'ribbon' : 'ribbon-outline';
-          } else if (route.name === 'Job') {
+          } else if (route.name === 'Company') {
             iconName = focused ? 'business' : 'business-outline';
           }
 
@@ -78,7 +78,7 @@ function TabNavigator() {
         }}
       />
       <Tab.Screen 
-        name="Job" 
+        name="Company" 
         component={Company}
         options={{ 
           tabBarLabel: '회사'
@@ -138,20 +138,6 @@ export default function App() {
           }}
         />
         <Stack.Screen 
-          name="Test2" 
-          component={Test2}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
-          name="Job" 
-          component={Job}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
           name="Job12" 
           component={Job12}
           options={{
@@ -161,6 +147,20 @@ export default function App() {
         <Stack.Screen 
           name="Setting" 
           component={Setting}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name="SelectJob" 
+          component={SelectJobScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name="Test2" 
+          component={Test2}
           options={{
             headerShown: false,
           }}

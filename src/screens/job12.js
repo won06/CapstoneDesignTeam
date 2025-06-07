@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
 import Logo from '../components/Logo';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFieldIdByName } from '../fields';
+import { getCourseIdByName } from '../courses';
 
 const interests = [
   { title: '개론', items: ['전자AI시스템공학개론','AI소프트웨어개론'] },
@@ -27,8 +29,35 @@ const interests = [
   { title: '진로·창업·캡스톤·실습', items: ['진로탐색과꿈-설계', '취업·창업과꿈-설계', '벤처캡스톤디자인', '현장실습'] },
 ];
 
-export default function Job12({ navigation }) {
+export default function Job12({ navigation, route }) {
   const [selectedInterests, setSelectedInterests] = useState([]);
+  const selectedCourses = Array.isArray(route?.params?.selectedCourses)
+    ? route.params.selectedCourses
+    : [];
+
+  // 예시: 분야명 → field_id 매핑 (실제 field_id에 맞게 수정 필요)
+  const fieldNameToId = {
+    '개론': 1,
+    '수학·통계': 2,
+    '기초전자·물리 실험': 3,
+    '회로·디지털공학': 4,
+    '제어·로봇·자율시스템': 5,
+    '통신·네트워크': 6,
+    '컴퓨터시스템·운영체제': 7,
+    '프로그래밍·SW 개발': 8,
+    '데이터·DB': 9,
+    '인공지능·머신러닝': 10,
+    'IoT·스마트시스템·센서': 11,
+    '멀티미디어·신호처리': 12,
+    '진로·창업·캡스톤·실습': 13
+  };
+
+  // 예시: 과목명 → course_id 매핑 (실제 course_id에 맞게 수정 필요)
+  const courseNameToId = {
+    '전자AI시스템공학개론': 101,
+    'AI소프트웨어개론': 102,
+    // ... 나머지 과목명: id 매핑 추가 ...
+  };
 
   const toggleInterest = (interest) => {
     setSelectedInterests((prev) =>
@@ -38,15 +67,62 @@ export default function Job12({ navigation }) {
 
   const handleCompleteTest = async () => {
     const user_id = await AsyncStorage.getItem('user_id');
+    // 분야명 배열 → field_id 배열 (항상 배열 보장)
+    const selectedFieldIds = Array.isArray(selectedInterests)
+      ? selectedInterests.map(name => fieldNameToId[name]).filter(Boolean)
+      : [];
+    // 과목명 배열 → course_id 배열 (항상 배열 보장)
+    const selectedCourseIds = Array.isArray(selectedCourses)
+      ? selectedCourses.map(name => courseNameToId[name]).filter(Boolean)
+      : [];
     try {
-      await fetch('http://192.168.45.78:3001/api/user/complete-test', {
+      const res = await fetch('http://192.168.45.78:3001/api/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id }),
+        body: JSON.stringify({
+          user_id,
+          selected_fields: selectedFieldIds,
+          selected_courses: selectedCourseIds
+        })
       });
-    } catch (e) {}
-    navigation.navigate('MainTabs');
+      const data = await res.json();
+      if (res.ok) {
+        // 적성검사 완료 플래그 업데이트
+        const completeRes = await fetch('http://192.168.45.78:3001/api/user/complete-test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id })
+        });
+        const completeData = await completeRes.json();
+        if (completeRes.ok) {
+          navigation.navigate('MainTabs');
+        } else {
+          alert(completeData.message || '적성검사 완료 처리에 실패했습니다.');
+        }
+      } else {
+        alert(data.error || '추천 처리 중 오류');
+      }
+    } catch (e) {
+      alert('네트워크 오류');
+    }
   };
+
+  useEffect(() => {
+    const checkTestCompleted = async () => {
+      const user_id = await AsyncStorage.getItem('user_id');
+      if (!user_id) return;
+      const res = await fetch(`http://192.168.45.78:3001/api/user/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id, password: 'dummy' }) // 비밀번호는 실제로 사용되지 않으므로 dummy 값
+      });
+      const data = await res.json();
+      if (data.is_test_completed === 1) {
+        navigation.replace('MainTabs');
+      }
+    };
+    checkTestCompleted();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

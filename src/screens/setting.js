@@ -18,7 +18,7 @@ export default function SettingScreen({ navigation }) {
         Alert.alert('오류', '로그인 정보가 없습니다.');
         return;
       }
-      const res = await fetch('http://192.168.4.236:3001/api/user/delete', {
+      const res = await fetch('http://192.168.45.78:3001/api/user/delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id })

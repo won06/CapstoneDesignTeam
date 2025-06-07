@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Logo from '../components/Logo';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AssessmentScreen({ navigation }) {
   const [grade, setGrade] = useState('');
@@ -20,20 +21,32 @@ export default function AssessmentScreen({ navigation }) {
 
   const gradeOptions = ['1학년', '2학년', '3학년', '4학년'];
 
+  useEffect(() => {
+    const checkTestCompleted = async () => {
+      const user_id = await AsyncStorage.getItem('user_id');
+      if (!user_id) return;
+      const res = await fetch(`http://192.168.45.78:3001/api/user/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id, password: 'dummy' }) // 비밀번호는 실제로 사용되지 않으므로 dummy 값
+      });
+      const data = await res.json();
+      if (data.is_test_completed === 1) {
+        navigation.replace('MainTabs');
+      }
+    };
+    checkTestCompleted();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={{ position: 'absolute', left: 24, top: 40, zIndex: 1 }}
-        >
-          <Ionicons name="chevron-back" size={28} color="#6b7280" />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text style={styles.logo}>EoyeongBuyeong</Text>
-        </View>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.closeBtn}>
-          <Ionicons name="close" size={28} color="#6b7280" />
+        <Logo style={{ marginLeft: 12 }} />
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Ionicons name="close" size={24} color="#222" />
         </TouchableOpacity>
       </View>
 
@@ -77,7 +90,7 @@ export default function AssessmentScreen({ navigation }) {
       </Modal>
 
       {/* 직업 유무 */}
-      <Text style={[styles.label, { marginTop: 24 }]}>현재 직업을 가지고 계신가요?</Text>
+      <Text style={[styles.label, { marginTop: 24 }]}>현재 희망하는 직업이 있나요?</Text>
       <Text style={styles.subLabel}>맞춤형 진로 제안을 위한 질문이에요</Text>
 
       <View style={styles.buttonGroup}>
@@ -126,10 +139,10 @@ export default function AssessmentScreen({ navigation }) {
           ]}
           disabled={!grade || !jobStatus}
           onPress={() => {
-            if ((grade === '1학년' || grade === '2학년') && jobStatus === '없음') {
+            if (jobStatus === '있음') {
+              navigation.navigate('SelectJob');
+            } else if ((grade === '1학년' || grade === '2학년') && jobStatus === '없음') {
               navigation.navigate('Test2', { fromJob12: true });
-            } else if (jobStatus === '있음') {
-              navigation.navigate('Test2', { fromJob: true });
             } else {
               navigation.navigate('Test2', { fromJob12: false });
             }
@@ -152,11 +165,11 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 40,
-    paddingHorizontal: 0,
     marginBottom: 16,
+    paddingTop: 60,
+    paddingHorizontal: 20,
   },
   logo: {
     fontFamily: 'cursive',

@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import Logo from '../components/Logo';
 import { Ionicons } from '@expo/vector-icons';
+import { getFieldIdByName } from '../fields';
+import { getCourseIdByName } from '../courses';
 
 const categories = [
   { title: '개론', courses: ['전자AI시스템공학개론','AI소프트웨어개론'] },
@@ -101,9 +103,9 @@ export default function CourseSelectionScreen({ navigation, route }) {
             if (fromJob) {
               navigation.navigate('Job');
             } else if (fromJob12) {
-              navigation.navigate('Job12');
+              navigation.navigate('Job12', { selectedCourses });
             } else {
-              navigation.navigate('MainTabs');
+              navigation.navigate('Job12', { selectedCourses });
             }
           }}
         >
@@ -199,4 +201,4 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 100,
   },
-});
+}); 

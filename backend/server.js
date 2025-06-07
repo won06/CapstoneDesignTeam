@@ -13,15 +13,17 @@ app.use(express.urlencoded({ extended: true }));
 // 라우터 설정
 const careersRouter = require('./routes/careers');
 const userRouter = require('./routes/user');
+const recommendRouter = require('./routes/recommend');
 app.use('/api/careers', careersRouter);
 app.use('/api/user', userRouter);
+app.use('/api/recommend', recommendRouter);
 
 // MySQL 연결 설정
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: 'dlrbgus123@',
-  database: 'capstone_test_db2',
+  database: 'capstone_test_db3',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
