@@ -17,14 +17,12 @@ const recommendedCourses = [
     type: '필수과목',
     status: '수강완료',
     prereqs: ['자료구조', '알고리즘'],
-    bookmarked: false,
   },
   {
     id: '2',
     title: '딥러닝',
     type: '선택과목',
     prereqs: ['인공지능개론', '확률과통계'],
-    bookmarked: false,
   },
   {
     id: '3',
@@ -32,7 +30,6 @@ const recommendedCourses = [
     type: '필수과목',
     status: '수강완료',
     prereqs: ['파이썬프로그래밍'],
-    bookmarked: false,
   },
 ];
 
@@ -40,14 +37,6 @@ export default function LectureScreen({ navigation }) {
   const [selectedSemester, setSelectedSemester] = useState('2학년 1학기');
   const [courses, setCourses] = useState(recommendedCourses);
   const [selectedTab, setSelectedTab] = useState('강의');
-
-  const toggleBookmark = (id) => {
-    setCourses((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, bookmarked: !c.bookmarked } : c
-      )
-    );
-  };
 
   const handleTabPress = (tab) => {
     setSelectedTab(tab);
@@ -90,13 +79,6 @@ export default function LectureScreen({ navigation }) {
                   </View>
                 )}
               </View>
-              <TouchableOpacity onPress={() => toggleBookmark(item.id)}>
-                {item.bookmarked ? (
-                  <Ionicons name="bookmark" size={20} color="#2563eb" />
-                ) : (
-                  <Feather name="bookmark" size={20} color="#cbd5e1" />
-                )}
-              </TouchableOpacity>
             </View>
             <Text style={[
               styles.courseType,

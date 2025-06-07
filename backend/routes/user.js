@@ -7,8 +7,13 @@ const pool = require('../db');
 // 회원가입
 router.post('/register', async (req, res) => {
   const { user_id, password, name, grade, department } = req.body;
+  // 이메일 형식 정규식
+  const emailRegex = /^[\w.-]+@[\w.-]+\.[A-Za-z]{2,}$/;
   if (!user_id || !password || !name || !grade) {
     return res.status(400).json({ message: '필수 항목이 누락되었습니다.' });
+  }
+  if (!emailRegex.test(user_id)) {
+    return res.status(400).json({ message: '올바른 이메일 주소를 입력하세요.' });
   }
   try {
     const hashedPassword = await bcrypt.hash(password, 10);

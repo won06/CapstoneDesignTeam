@@ -245,9 +245,6 @@ export default function CredentialScreen({ navigation }) {
                 </View>
               ))}
             </ScrollView>
-            <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
-              <Text style={styles.modalButtonText}>자격증 준비하기</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -402,18 +399,6 @@ const styles = StyleSheet.create({
   modalListText: {
     fontSize: 13,
     color: '#222',
-  },
-  modalButton: {
-    backgroundColor: '#3b82f6',
-    borderRadius: 10,
-    paddingVertical: 14,
-    marginTop: 10,
-  },
-  modalButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   cubeCard: {
     flexDirection: 'row',

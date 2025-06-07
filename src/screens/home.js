@@ -12,7 +12,7 @@ import {
 import { Ionicons, Feather } from '@expo/vector-icons';
 import Logo from '../components/Logo';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'http://192.168.45.78:3001/api';
 
 export default function CareerRecommendationScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
