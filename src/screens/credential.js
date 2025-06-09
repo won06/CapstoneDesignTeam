@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,110 +8,72 @@ import {
   Modal,
   Pressable,
   FlatList,
+  Linking,
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import Logo from '../components/Logo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const certificates = [
-  {
-    id: '1',
-    title: 'AWS 머신러닝 전문가 자격증',
-    organization: 'Amazon Web Services',
-    level: '전문가',
-    description: 'AWS 클라우드 환경에서 머신러닝 솔루션을 설계, 구현, 배포하는 능력을 검증하는 자격증입니다.',
-    requirements: ['AWS 기초 지식', '머신러닝 기초', 'Python 프로그래밍'],
-    validity: '3년',
-    icon: 'cloud',
-    detail: {
-      summary: 'AWS 머신러닝 전문가 자격증은 AWS 클라우드 환경에서 머신러닝 솔루션을 설계하고 구현하는 능력을 검증합니다. 데이터 전처리, 모델 학습, 배포까지 전체 ML 파이프라인을 다룰 수 있는 전문성을 보여줍니다.',
-      examInfo: {
-        format: '객관식 + 실습',
-        duration: '180분',
-        questions: '65문항',
-        passingScore: '750/1000점',
-      },
-      preparation: [
-        'AWS 공식 학습 자료',
-        '실습 프로젝트 수행',
-        '온라인 강의 수강',
-        '모의고사 응시'
-      ],
-      benefits: [
-        '클라우드 ML 전문가로서의 인정',
-        '높은 연봉과 취업 기회',
-        'AWS 파트너사 우대',
-        '전문가 커뮤니티 참여'
-      ]
-    }
-  },
-  {
-    id: '2',
-    title: '구글 공인 머신러닝 엔지니어',
-    organization: 'Google',
-    level: '전문가',
-    description: 'Google Cloud Platform을 활용한 머신러닝 모델 개발 및 배포 능력을 검증하는 자격증입니다.',
-    requirements: ['GCP 기초', '머신러닝 기초', 'Python 프로그래밍'],
-    validity: '2년',
-    icon: 'logo-google',
-    detail: {
-      summary: '구글 공인 머신러닝 엔지니어 자격증은 GCP 환경에서 머신러닝 모델을 개발하고 배포하는 능력을 검증합니다. TensorFlow와 Google Cloud AI Platform을 활용한 실무 역량을 평가합니다.',
-      examInfo: {
-        format: '실습 위주',
-        duration: '120분',
-        tasks: '실무 과제',
-        passingScore: '70% 이상',
-      },
-      preparation: [
-        'Google Cloud 학습 자료',
-        'TensorFlow 공식 튜토리얼',
-        '실습 프로젝트',
-        '스터디 그룹 참여'
-      ],
-      benefits: [
-        '구글 공인 전문가 인증',
-        '높은 시장 가치',
-        '구글 파트너사 우대',
-        '전문가 네트워크'
-      ]
-    }
-  },
-  {
-    id: '3',
-    title: '데이터 분석 전문가(ADP)',
-    organization: '한국데이터산업진흥원',
-    level: '국가공인',
-    description: '데이터 분석의 기초부터 고급 분석까지 전 과정을 다루는 국가공인 자격증입니다.',
-    requirements: ['통계학 기초', 'R/Python', '데이터베이스'],
-    validity: '영구',
-    icon: 'bar-chart',
-    detail: {
-      summary: '데이터 분석 전문가(ADP)는 데이터 분석의 전 과정을 다루는 국가공인 자격증입니다. 데이터 수집, 전처리, 분석, 시각화까지 데이터 분석의 모든 영역을 포괄합니다.',
-      examInfo: {
-        format: '필기 + 실기',
-        duration: '필기 90분, 실기 180분',
-        level: '필기 + 실기 통합',
-        passingScore: '60점 이상',
-      },
-      preparation: [
-        '공식 교재 학습',
-        '실습 문제 풀이',
-        '온라인 강의',
-        '스터디 그룹'
-      ],
-      benefits: [
-        '국가공인 자격증',
-        '공공기관 채용 우대',
-        '데이터 분석 전문가 인정',
-        '지속적인 교육 지원'
-      ]
-    }
-  }
-];
+const API_URL = 'http://192.168.45.78:3001/api';
 
 export default function CredentialScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [selectedTab, setSelectedTab] = useState('자격증');
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCertificates();
+  }, []);
+
+  const fetchCertificates = async () => {
+    try {
+      const user_id = await AsyncStorage.getItem('user_id');
+      if (!user_id) return;
+
+      const response = await fetch(`${API_URL}/recommend/result?user_id=${user_id}`);
+      if (response.ok) {
+        const data = await response.json();
+        // 자격증 데이터 가공
+        const formattedCerts = data.certifications.map(cert => ({
+          id: cert.cert_id.toString(),
+          title: cert.jmfldnm,
+          organization: cert.qualgbnm,
+          level: cert.seriesnm,
+          description: `${cert.qualgbnm} ${cert.seriesnm} 자격증입니다.`,
+          validity: '영구',
+          icon: 'ribbon',
+          detail: {
+            summary: `${cert.jmfldnm}은(는) ${cert.qualgbnm} ${cert.seriesnm} 자격증으로, 해당 분야의 전문성을 인증하는 국가공인 자격증입니다.`,
+            examInfo: {
+              format: '필기 + 실기',
+              duration: '시험별 상이',
+              questions: '시험별 상이',
+              passingScore: '60점 이상',
+            },
+            preparation: [
+              '공식 교재 학습',
+              '실습 문제 풀이',
+              '온라인 강의',
+              '스터디 그룹'
+            ],
+            benefits: [
+              '국가공인 자격증',
+              '취업 시 우대',
+              '전문성 인정',
+              '지속적인 교육 지원'
+            ]
+          }
+        }));
+        setCertificates(formattedCerts);
+      }
+    } catch (error) {
+      console.error('자격증 데이터 로딩 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openModal = (certificate) => {
     setSelectedCertificate(certificate);
@@ -131,6 +93,26 @@ export default function CredentialScreen({ navigation }) {
       navigation.navigate('Lecture');
     }
   };
+
+  const handleQnetPress = () => {
+    Linking.openURL('https://www.q-net.or.kr/man001.do?gSite=Q&gIntro=Y');
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Logo />
+          <TouchableOpacity onPress={() => navigation.navigate('Setting')}>
+            <Ionicons name="settings-outline" size={20} color="#111" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>자격증 정보를 불러오는 중...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -152,8 +134,8 @@ export default function CredentialScreen({ navigation }) {
       <FlatList
         data={certificates}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 80 }}
-        style={{ flex: 1, marginBottom: 64 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        style={{ flex: 1, marginBottom: 80 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <>
@@ -176,9 +158,9 @@ export default function CredentialScreen({ navigation }) {
                 </View>
               </View>
             </TouchableOpacity>
-            {/* 데이터 분석 전문가(ADP) 카드 아래에 큐넷 카드 추가 */}
-            {item.id === '3' && (
-              <TouchableOpacity style={styles.cubeCard}>
+            {/* 마지막 자격증 카드 아래에 큐넷 카드 추가 */}
+            {item.id === certificates[certificates.length - 1].id && (
+              <TouchableOpacity style={styles.cubeCard} onPress={handleQnetPress}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.cubeTitle}>큐넷 자격증</Text>
                   <Text style={styles.cubeDesc}>국가기술자격 정보 포털</Text>
@@ -403,23 +385,24 @@ const styles = StyleSheet.create({
   cubeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f6faff',
-    borderWidth: 2,
-    borderColor: '#c7e0ff',
-    borderRadius: 16,
+    backgroundColor: '#fff',
     padding: 16,
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 20,
-    shadowColor: '#c7e0ff',
+    borderRadius: 12,
+    marginHorizontal: 24,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   cubeTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#222e39',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
     marginBottom: 4,
   },
   cubeDesc: {
@@ -427,16 +410,22 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   cubeIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#eff6ff',
     justifyContent: 'center',
-    shadowColor: '#c7e0ff',
-    shadowOpacity: 0.15,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
   },
 });
 

@@ -1,0 +1,55 @@
+-- MySQL dump 10.13  Distrib 8.0.40, for Win64 (x86_64)
+--
+-- Host: 127.0.0.1    Database: capstone
+-- ------------------------------------------------------
+-- Server version	8.0.40
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `careers_has_fields`
+--
+
+DROP TABLE IF EXISTS `careers_has_fields`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `careers_has_fields` (
+  `fields_field_id` varchar(10) NOT NULL,
+  `careers_career_id` int NOT NULL,
+  PRIMARY KEY (`fields_field_id`,`careers_career_id`),
+  KEY `fk_fields_has_careers_careers1_idx` (`careers_career_id`),
+  KEY `fk_fields_has_careers_fields1_idx` (`fields_field_id`),
+  CONSTRAINT `fk_fields_has_careers_careers1` FOREIGN KEY (`careers_career_id`) REFERENCES `careers` (`career_id`),
+  CONSTRAINT `fk_fields_has_careers_fields1` FOREIGN KEY (`fields_field_id`) REFERENCES `fields` (`field_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `careers_has_fields`
+--
+
+LOCK TABLES `careers_has_fields` WRITE;
+/*!40000 ALTER TABLE `careers_has_fields` DISABLE KEYS */;
+INSERT INTO `careers_has_fields` VALUES ('76199',26),('2353',44),('23422',64),('75109',72),('85429',73),('2341',76),('2342',77),('2212',89),('77231',90),('22501',91),('23422',103),('2232',294),('63991',295),('28551',299),('224',300),('27151',301),('2743',312),('58221',321),('5821',329),('22242',375),('135',462),('1111',482),('22290',483),('84404',484),('223',485),('22312',486),('2232',489),('22312',505),('22233',530),('22239',546);
+/*!40000 ALTER TABLE `careers_has_fields` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-06-08 20:32:53

@@ -3,36 +3,104 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, Button, Platform } fro
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// API URL 수정
+const API_URL = 'http://192.168.45.78:3001';
+
 export default function SettingScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleWithdraw = () => {
     setModalVisible(true);
   };
 
   const handleConfirm = async () => {
+    if (isLoading) return; // 중복 실행 방지
+    setIsLoading(true);
     setModalVisible(false);
+
     try {
       const user_id = await AsyncStorage.getItem('user_id');
+      console.log('[회원 탈퇴] 시작 - user_id:', user_id);
+      
       if (!user_id) {
         Alert.alert('오류', '로그인 정보가 없습니다.');
         return;
       }
-      const res = await fetch('http://192.168.45.78:3001/api/user/delete', {
+
+      // 1. 먼저 추천 데이터 삭제
+      console.log('[회원 탈퇴] 추천 데이터 삭제 시도');
+      const recommendResponse = await fetch(`${API_URL}/recommend/delete`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ user_id })
       });
-      const data = await res.json();
-      if (res.ok) {
-        Alert.alert('탈퇴 완료', '회원 탈퇴가 완료되었습니다.');
-        await AsyncStorage.removeItem('user_id');
-        navigation.navigate('Login');
-      } else {
-        Alert.alert('탈퇴 실패', data.message || '탈퇴에 실패했습니다.');
+      console.log('[회원 탈퇴] 추천 데이터 삭제 응답:', recommendResponse.status);
+
+      if (!recommendResponse.ok) {
+        const errorData = await recommendResponse.json().catch(() => ({}));
+        console.log('[회원 탈퇴] 추천 데이터 삭제 실패:', errorData);
+        throw new Error(errorData.message || '추천 데이터 삭제 중 오류가 발생했습니다.');
       }
+
+      // 2. 사용자 데이터 삭제
+      console.log('[회원 탈퇴] 사용자 데이터 삭제 시도');
+      const userResponse = await fetch(`${API_URL}/api/user/delete`, {
+        method: 'DELETE',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ user_id })
+      });
+
+      console.log('[회원 탈퇴] 사용자 데이터 삭제 응답:', userResponse.status);
+      
+      if (!userResponse.ok) {
+        const errorData = await userResponse.json().catch(() => ({}));
+        console.log('[회원 탈퇴] 에러 데이터:', errorData);
+        throw new Error(errorData.message || '회원 탈퇴 처리 중 오류가 발생했습니다.');
+      }
+
+      const data = await userResponse.json();
+      console.log('[회원 탈퇴] 성공 응답:', data);
+
+      // 3. 로컬 데이터 삭제
+      console.log('[회원 탈퇴] 로컬 데이터 삭제 시도');
+      await AsyncStorage.clear();
+      console.log('[회원 탈퇴] 로컬 데이터 삭제 완료');
+
+      // 4. 로그인 화면으로 이동
+      Alert.alert(
+        '탈퇴 완료',
+        '회원 탈퇴가 완료되었습니다.',
+        [
+          {
+            text: '확인',
+            onPress: () => {
+              console.log('[회원 탈퇴] 로그인 화면으로 이동');
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            }
+          }
+        ],
+        { cancelable: false }
+      );
     } catch (err) {
-      Alert.alert('에러', '네트워크 오류 또는 서버 오류가 발생했습니다.');
+      console.error('[회원 탈퇴] 오류 발생:', err);
+      Alert.alert(
+        '오류',
+        err.message || '네트워크 오류 또는 서버 오류가 발생했습니다.',
+        [{ text: '확인' }],
+        { cancelable: false }
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -67,7 +135,11 @@ export default function SettingScreen({ navigation }) {
         </TouchableOpacity>
         <View style={styles.separator} />
 
-        <TouchableOpacity style={styles.menuItem} onPress={handleWithdraw}>
+        <TouchableOpacity 
+          style={styles.menuItem} 
+          onPress={handleWithdraw}
+          disabled={isLoading}
+        >
           <Ionicons name="person-remove-outline" size={22} color="#888" style={styles.menuIcon} />
           <Text style={[styles.menuText, { color: '#888' }]}>탈퇴</Text>
           <Ionicons name="chevron-forward" size={20} color="#bbb" style={styles.menuArrow} />
@@ -80,10 +152,18 @@ export default function SettingScreen({ navigation }) {
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>정말로 탈퇴하시겠습니까?</Text>
             <View style={styles.modalButtonRow}>
-              <TouchableOpacity style={styles.modalButton} onPress={handleConfirm}>
+              <TouchableOpacity 
+                style={styles.modalButton} 
+                onPress={handleConfirm}
+                disabled={isLoading}
+              >
                 <Text style={styles.modalButtonText}>예</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalButton, styles.modalButtonCancel]} onPress={handleCancel}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.modalButtonCancel]} 
+                onPress={handleCancel}
+                disabled={isLoading}
+              >
                 <Text style={[styles.modalButtonText, { color: '#222' }]}>아니요</Text>
               </TouchableOpacity>
             </View>

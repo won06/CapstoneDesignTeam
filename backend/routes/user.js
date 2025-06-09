@@ -86,11 +86,39 @@ router.delete('/delete', async (req, res) => {
   if (!user_id) {
     return res.status(400).json({ message: 'user_id가 필요합니다.' });
   }
+
+  const connection = await pool.getConnection();
+  
   try {
-    await pool.query('DELETE FROM users WHERE user_id = ?', [user_id]);
+    await connection.beginTransaction();
+
+    // 1. 사용자의 강의 평가 데이터 삭제
+    await connection.query('DELETE FROM user_course_ratings WHERE user_id = ?', [user_id]);
+    console.log('[회원 탈퇴] 강의 평가 데이터 삭제 완료');
+
+    // 2. 추천 데이터 삭제
+    await connection.query('DELETE FROM user_recommended_careers WHERE user_id = ?', [user_id]);
+    await connection.query('DELETE FROM user_recommended_certifications WHERE user_id = ?', [user_id]);
+    await connection.query('DELETE FROM user_recommended_companies WHERE user_id = ?', [user_id]);
+    await connection.query('DELETE FROM user_recommended_courses WHERE user_id = ?', [user_id]);
+    console.log('[회원 탈퇴] 추천 데이터 삭제 완료');
+
+    // 3. 사용자 데이터 삭제
+    const [userResult] = await connection.query('DELETE FROM users WHERE user_id = ?', [user_id]);
+    
+    if (userResult.affectedRows === 0) {
+      throw new Error('사용자를 찾을 수 없습니다.');
+    }
+    console.log('[회원 탈퇴] 사용자 데이터 삭제 완료');
+
+    await connection.commit();
     res.json({ message: '회원 탈퇴가 완료되었습니다.' });
   } catch (err) {
-    res.status(500).json({ message: '서버 오류' });
+    await connection.rollback();
+    console.error('[회원 탈퇴] 오류 발생:', err);
+    res.status(500).json({ message: err.message || '회원 탈퇴 처리 중 오류가 발생했습니다.' });
+  } finally {
+    connection.release();
   }
 });
 

@@ -284,4 +284,25 @@ router.get('/result', async (req, res) => {
   }
 });
 
+// 추천 데이터 삭제 API
+router.delete('/delete', async (req, res) => {
+  const { user_id } = req.body;
+  if (!user_id) {
+    return res.status(400).json({ error: 'user_id가 필요합니다.' });
+  }
+  
+  try {
+    // 모든 추천 데이터 삭제
+    await db.query('DELETE FROM user_recommended_careers WHERE user_id = ?', [user_id]);
+    await db.query('DELETE FROM user_recommended_certifications WHERE user_id = ?', [user_id]);
+    await db.query('DELETE FROM user_recommended_companies WHERE user_id = ?', [user_id]);
+    await db.query('DELETE FROM user_recommended_courses WHERE user_id = ?', [user_id]);
+    
+    res.json({ message: '추천 데이터가 삭제되었습니다.' });
+  } catch (err) {
+    console.error('추천 데이터 삭제 중 오류:', err);
+    res.status(500).json({ error: '추천 데이터 삭제 중 오류가 발생했습니다.' });
+  }
+});
+
 module.exports = router; 

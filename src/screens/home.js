@@ -104,7 +104,8 @@ export default function CareerRecommendationScreen({ navigation }) {
       <FlatList
         data={careers}
         keyExtractor={(item) => item.career_id.toString()}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 90 }}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => openModal(item)}>
             <View style={styles.card}>

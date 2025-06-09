@@ -1,5 +1,8 @@
 // API 서버 URL 설정
-export const API_URL = 'http://192.168.45.78:3001';
+export const API_URL = 'http://localhost:3001';
+
+// 개발 환경에서는 실제 IP 주소를 사용할 수 있습니다.
+// export const API_URL = 'http://192.168.45.78:3001';
 
 // 환경별 설정
 const ENV = {

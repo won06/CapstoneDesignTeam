@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { LogBox, View } from 'react-native';
 import Login from './src/screens/login';
 import SignUp from './src/screens/signup';
 import Test from './src/screens/test';
@@ -16,156 +17,197 @@ import Setting from './src/screens/setting';
 import SelectJobScreen from './src/screens/SelectJobScreen';
 import Test2 from './src/screens/test2';
 
+// LogBox 설정
+LogBox.ignoreLogs(['Text strings must be rendered within a <Text> component']);
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
 
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Lecture') {
-            iconName = focused ? 'book' : 'book-outline';
-          } else if (route.name === 'Credential') {
-            iconName = focused ? 'ribbon' : 'ribbon-outline';
-          } else if (route.name === 'Company') {
-            iconName = focused ? 'business' : 'business-outline';
-          }
+            if (route.name === 'Home') {
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === 'Lecture') {
+              iconName = focused ? 'book' : 'book-outline';
+            } else if (route.name === 'Credential') {
+              iconName = focused ? 'ribbon' : 'ribbon-outline';
+            } else if (route.name === 'Company') {
+              iconName = focused ? 'business' : 'business-outline';
+            }
 
-          return <Ionicons name={iconName} size={24} color={color} />;
-        },
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#9ca3af',
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-          marginBottom: 4,
-        },
-        tabBarStyle: {
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-          borderTopWidth: 1,
-          borderTopColor: '#e5e7eb',
-          backgroundColor: '#fff',
-        },
-        headerShown: false,
-      })}
-    >
-      <Tab.Screen 
-        name="Home" 
-        component={Home}
-        options={{
-          tabBarLabel: '홈',
-        }}
-      />
-      <Tab.Screen 
-        name="Lecture" 
-        component={Lecture}
-        options={{
-          tabBarLabel: '강의',
-        }}
-      />
-      <Tab.Screen 
-        name="Credential" 
-        component={Credential}
-        options={{
-          tabBarLabel: '자격증',
-        }}
-      />
-      <Tab.Screen 
-        name="Company" 
-        component={Company}
-        options={{ 
-          tabBarLabel: '회사'
-        }}
-      />
-    </Tab.Navigator>
+            return <Ionicons name={iconName} size={24} color={color} />;
+          },
+          tabBarActiveTintColor: '#2563eb',
+          tabBarInactiveTintColor: '#9ca3af',
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '500',
+            marginBottom: 8,
+            paddingBottom: 4,
+          },
+          tabBarStyle: {
+            height: 65,
+            paddingBottom: 12,
+            paddingTop: 8,
+            borderTopWidth: 1,
+            borderTopColor: '#e5e7eb',
+            backgroundColor: '#fff',
+            position: 'absolute',
+            bottom: 25,
+            left: 20,
+            right: 20,
+            elevation: 5,
+            borderRadius: 15,
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+          },
+          tabBarBackground: () => (
+            <View style={{ 
+              position: 'absolute', 
+              bottom: 0, 
+              left: 0, 
+              right: 0, 
+              height: 100,
+              backgroundColor: '#fff',
+              borderTopLeftRadius: 15,
+              borderTopRightRadius: 15,
+            }} />
+          ),
+          headerShown: false,
+        })}
+      >
+        <Tab.Screen 
+          name="Home" 
+          component={Home}
+          options={{
+            tabBarLabel: '홈',
+          }}
+        />
+        <Tab.Screen 
+          name="Lecture" 
+          component={Lecture}
+          options={{
+            tabBarLabel: '강의',
+          }}
+        />
+        <Tab.Screen 
+          name="Credential" 
+          component={Credential}
+          options={{
+            tabBarLabel: '자격증',
+          }}
+        />
+        <Tab.Screen 
+          name="Company" 
+          component={Company}
+          options={{ 
+            tabBarLabel: '회사'
+          }}
+        />
+      </Tab.Navigator>
+      <View style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 30,
+        backgroundColor: '#fff',
+      }} />
+    </View>
   );
 }
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator 
-        initialRouteName="Login" 
-        screenOptions={{
-          headerShown: true,
-          headerBackTitle: '뒤로',
-          headerBackVisible: true,
-          gestureEnabled: true,
-          cardOverlayEnabled: true,
-          animation: 'slide_from_right',
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTintColor: '#000',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      >
-        <Stack.Screen 
-          name="Login" 
-          component={Login}
-          options={{
-            headerShown: false,
+      <View style={{ flex: 1, backgroundColor: '#fff' }}>
+        <Stack.Navigator 
+          initialRouteName="Login" 
+          screenOptions={{
+            headerShown: true,
+            headerBackTitle: '뒤로',
+            headerBackVisible: true,
+            gestureEnabled: true,
+            cardOverlayEnabled: true,
+            animation: 'slide_from_right',
+            headerStyle: {
+              backgroundColor: '#fff',
+            },
+            headerTintColor: '#000',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
           }}
-        />
-        <Stack.Screen 
-          name="SignUp" 
-          component={SignUp}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
-          name="MainTabs" 
-          component={TabNavigator}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
-          name="Test" 
-          component={Test}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
-          name="Job12" 
-          component={Job12}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
-          name="Setting" 
-          component={Setting}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
-          name="SelectJob" 
-          component={SelectJobScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
-          name="Test2" 
-          component={Test2}
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack.Navigator>
+        >
+          <Stack.Screen 
+            name="Login" 
+            component={Login}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen 
+            name="SignUp" 
+            component={SignUp}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen 
+            name="MainTabs" 
+            component={TabNavigator}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen 
+            name="Test" 
+            component={Test}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen 
+            name="Job12" 
+            component={Job12}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen 
+            name="Setting" 
+            component={Setting}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen 
+            name="SelectJob" 
+            component={SelectJobScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen 
+            name="Test2" 
+            component={Test2}
+            options={{
+              headerShown: false,
+            }}
+          />
+        </Stack.Navigator>
+      </View>
     </NavigationContainer>
   );
 }

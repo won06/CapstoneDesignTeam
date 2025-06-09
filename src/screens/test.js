@@ -141,10 +141,8 @@ export default function AssessmentScreen({ navigation }) {
           onPress={() => {
             if (jobStatus === '있음') {
               navigation.navigate('SelectJob');
-            } else if ((grade === '1학년' || grade === '2학년') && jobStatus === '없음') {
-              navigation.navigate('Test2', { fromJob12: true });
             } else {
-              navigation.navigate('Test2', { fromJob12: false });
+              navigation.navigate('Test2', { fromJob12: true });
             }
           }}
         >

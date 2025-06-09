@@ -76,7 +76,7 @@ export default function SignupScreen({ navigation }) {
     <View style={styles.container}>
       <Logo style={{ marginBottom: 32 }} />
       <Text style={styles.title}>계정 만들기</Text>
-      <Text style={styles.subtitle}>개인정보를 입력해주세요요</Text>
+      <Text style={styles.subtitle}>개인정보를 입력해주세요</Text>
 
       <TextInput
         placeholder="이름"

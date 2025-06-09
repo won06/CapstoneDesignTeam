@@ -14,7 +14,6 @@ import { getFieldIdByName } from '../fields';
 import { getCourseIdByName } from '../courses';
 
 const interests = [
-  { title: '개론', items: ['전자AI시스템공학개론','AI소프트웨어개론'] },
   { title: '수학·통계', items: ['전공기초수학', 'AI융합기초수학','AI응용수학', '공업수학', '확률및통계', '확률과인공지능'] },
   { title: '기초전자·물리 실험', items: ['전자기학1', '전자기학2', '물리전자', '기초회로실험', '기초전기및실험', '전자회로실험1', '전자회로실험2'] },
   { title: '회로·디지털공학', items: ['회로이론1', '회로이론2', '디지털공학1', '디지털공학2', '디지털회로및실험', '디지털회로응용및실험'] },
@@ -25,8 +24,7 @@ const interests = [
   { title: '데이터·DB', items: ['데이터사이언스프로그래밍', '데이터구조', '데이터베이스언어', '데이터베이스', '데이터베이스설계및관리', '데이터베이스이론및실습', '기상기후빅데이터'] },
   { title: '인공지능·머신러닝', items: ['AI와재난과학', 'AI와재난현장', 'AI와재난모델링', 'AI와사운드', '머신러닝을위한선형대수', '머신러닝을위한통계학1', '머신러닝1', '머신러닝2', '통계적학습', '딥러닝', '신호처리입문'] },
   { title: 'IoT·스마트시스템·센서', items: ['사물인터넷프로그래밍', '사물인터넷', '사물인터넷설계', '지능형센서및센서네트워크', '마이크로파시스템실험', '디지털트윈'] },
-  { title: '멀티미디어·신호처리', items: ['미디어개론', '미디어콘텐츠설계', '디지털시스템설계', '디지털신호처리', '디지털신호처리실험', '신호해석및처리'] },
-  { title: '진로·창업·캡스톤·실습', items: ['진로탐색과꿈-설계', '취업·창업과꿈-설계', '벤처캡스톤디자인', '현장실습'] },
+  { title: '멀티미디어·신호처리', items: ['미디어개론', '미디어콘텐츠설계', '디지털시스템설계', '디지털신호처리', '디지털신호처리실험', '신호해석및처리'] }
 ];
 
 export default function Job12({ navigation, route }) {
@@ -35,33 +33,35 @@ export default function Job12({ navigation, route }) {
     ? route.params.selectedCourses
     : [];
 
-  // 예시: 분야명 → field_id 매핑 (실제 field_id에 맞게 수정 필요)
+  // 분야명 → field_id 매핑 (실제 DB의 field_id 값으로 수정)
   const fieldNameToId = {
-    '개론': 1,
-    '수학·통계': 2,
-    '기초전자·물리 실험': 3,
-    '회로·디지털공학': 4,
-    '제어·로봇·자율시스템': 5,
-    '통신·네트워크': 6,
-    '컴퓨터시스템·운영체제': 7,
-    '프로그래밍·SW 개발': 8,
-    '데이터·DB': 9,
-    '인공지능·머신러닝': 10,
-    'IoT·스마트시스템·센서': 11,
-    '멀티미디어·신호처리': 12,
-    '진로·창업·캡스톤·실습': 13
+    '수학·통계': '135',
+    '기초전자·물리 실험': '223',
+    '회로·디지털공학': '2232',
+    '제어·로봇·자율시스템': '22233',
+    '통신·네트워크': '22239',
+    '컴퓨터시스템·운영체제': '22242',
+    '프로그래밍·SW 개발': '22290',
+    '데이터·DB': '22312',
+    '인공지능·머신러닝': '23422',
+    'IoT·스마트시스템·센서': '2353',
+    '멀티미디어·신호처리': '224'
   };
 
-  // 예시: 과목명 → course_id 매핑 (실제 course_id에 맞게 수정 필요)
+  // 과목명 → course_id 매핑 (실제 DB의 course_id 값으로 수정)
   const courseNameToId = {
-    '전자AI시스템공학개론': 101,
-    'AI소프트웨어개론': 102,
-    // ... 나머지 과목명: id 매핑 추가 ...
+    '전공기초수학': 3151030,
+    'AI융합기초수학': 3151032,
+    'AI응용수학': 3151033,
+    '공업수학': 3151034,
+    '확률및통계': 3151035,
+    '확률과인공지능': 3151044
+    // ... 나머지 과목들도 실제 DB의 course_id로 매핑
   };
 
-  const toggleInterest = (interest) => {
+  const toggleInterest = (category) => {
     setSelectedInterests((prev) =>
-      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
+      prev.includes(category.title) ? prev.filter((i) => i !== category.title) : [...prev, category.title]
     );
   };
 
@@ -75,8 +75,10 @@ export default function Job12({ navigation, route }) {
     const selectedCourseIds = Array.isArray(selectedCourses)
       ? selectedCourses.map(name => courseNameToId[name]).filter(Boolean)
       : [];
+
     try {
-      const res = await fetch('http://192.168.45.78:3001/api/recommend', {
+      // 직업 추천 요청
+      const recommendRes = await fetch('http://192.168.45.78:3001/api/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -85,8 +87,17 @@ export default function Job12({ navigation, route }) {
           selected_courses: selectedCourseIds
         })
       });
-      const data = await res.json();
-      if (res.ok) {
+      const recommendData = await recommendRes.json();
+      
+      if (recommendRes.ok) {
+        // 추천된 직업과 기업 정보 저장
+        if (recommendData.recommended_careers && recommendData.recommended_careers.length > 0) {
+          await AsyncStorage.setItem('selectedJob', JSON.stringify(recommendData.recommended_careers[0]));
+        }
+        if (recommendData.recommended_companies && recommendData.recommended_companies.length > 0) {
+          await AsyncStorage.setItem('recommendedCompanies', JSON.stringify(recommendData.recommended_companies));
+        }
+        
         // 적성검사 완료 플래그 업데이트
         const completeRes = await fetch('http://192.168.45.78:3001/api/user/complete-test', {
           method: 'POST',
@@ -100,10 +111,11 @@ export default function Job12({ navigation, route }) {
           alert(completeData.message || '적성검사 완료 처리에 실패했습니다.');
         }
       } else {
-        alert(data.error || '추천 처리 중 오류');
+        alert(recommendData.error || '직업 추천 처리 중 오류가 발생했습니다.');
       }
     } catch (e) {
-      alert('네트워크 오류');
+      console.error(e);
+      alert('네트워크 오류가 발생했습니다.');
     }
   };
 
@@ -148,30 +160,34 @@ export default function Job12({ navigation, route }) {
       >
         {interests.map((category) => (
           <View key={category.title} style={styles.categoryContainer}>
-            <Text style={styles.categoryTitle}>{category.title}</Text>
+            <TouchableOpacity
+              style={[
+                styles.categoryHeader,
+                selectedInterests.includes(category.title) && styles.categoryHeaderSelected
+              ]}
+              onPress={() => toggleInterest(category)}
+            >
+              <Text style={styles.categoryTitle}>{category.title}</Text>
+            </TouchableOpacity>
             <View style={styles.interestGrid}>
-              {category.items.map((interest) => {
-                const selected = selectedInterests.includes(interest);
-                return (
-                  <TouchableOpacity
-                    key={interest}
+              {category.items.map((interest) => (
+                <View
+                  key={interest}
+                  style={[
+                    styles.interestBtn,
+                    selectedInterests.includes(category.title) && styles.interestBtnSelected,
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.interestBtn,
-                      selected && styles.interestBtnSelected,
+                      styles.interestText,
+                      selectedInterests.includes(category.title) && styles.interestTextSelected,
                     ]}
-                    onPress={() => toggleInterest(interest)}
                   >
-                    <Text
-                      style={[
-                        styles.interestText,
-                        selected && styles.interestTextSelected,
-                      ]}
-                    >
-                      {interest}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+                    {interest}
+                  </Text>
+                </View>
+              ))}
             </View>
           </View>
         ))}
@@ -186,7 +202,10 @@ export default function Job12({ navigation, route }) {
           disabled={selectedInterests.length === 0}
           onPress={handleCompleteTest}
         >
-          <Text style={styles.nextText}>다음</Text>
+          <Text style={[
+            styles.nextText,
+            selectedInterests.length === 0 && styles.nextTextDisabled
+          ]}>다음</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -236,10 +255,20 @@ const styles = StyleSheet.create({
   categoryContainer: {
     marginBottom: 24,
   },
+  categoryHeader: {
+    backgroundColor: '#f3f4f6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 12,
+  },
+  categoryHeaderSelected: {
+    backgroundColor: '#d6f3fa',
+  },
   categoryTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 12,
+    color: '#374151',
   },
   interestGrid: {
     flexDirection: 'row',
@@ -290,5 +319,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600',
+  },
+  nextTextDisabled: {
+    color: '#9ca3af',
   },
 });

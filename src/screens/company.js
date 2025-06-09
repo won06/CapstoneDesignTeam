@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,56 +7,55 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Logo from '../components/Logo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const jobData = {
-  smes: [
-    {
-      id: '1',
-      title: '데이터 분석가 (Data Analyst)',
-      company: '테크스타트 (중소기업)',
-      location: '서울 강남구',
-      dday: 'D-7',
-      image: require('./assets/sme1.png'),
-    },
-    {
-      id: '2',
-      title: '모바일 앱 개발자',
-      company: '앱솔루션 (중소기업)',
-      location: '서울 서초구',
-      dday: 'D-12',
-      image: require('./assets/sme2.png'),
-    },
-  ],
-  large: [
-    {
-      id: '3',
-      title: '시스템 소프트웨어 개발자',
-      company: '삼성전자 (대기업)',
-      location: '경기 수원시',
-      dday: 'D-10',
-      image: require('./assets/big1.png'),
-    },
-    {
-      id: '4',
-      title: 'AI 연구원',
-      company: 'LG전자 (대기업)',
-      location: '서울 서초구',
-      dday: 'D-14',
-      image: require('./assets/big2.png'),
-    },
-  ],
-};
+const API_URL = 'http://192.168.45.78:3001/api';
 
 export default function CompanyJobsScreen() {
   const navigation = useNavigation();
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  const fetchCompanies = async () => {
+    try {
+      const user_id = await AsyncStorage.getItem('user_id');
+      if (!user_id) return;
+
+      const response = await fetch(`${API_URL}/recommend/result?user_id=${user_id}`);
+      if (response.ok) {
+        const data = await response.json();
+        // 기업 데이터 가공
+        const formattedCompanies = data.companies.map(company => ({
+          id: company.company_code.toString(),
+          title: company.job_name || '채용 중',
+          company: company.company_name,
+          location: company.location || '위치 정보 없음',
+          dday: '채용 중',
+        }));
+        setCompanies(formattedCompanies);
+      }
+    } catch (error) {
+      console.error('기업 데이터 로딩 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaraminPress = () => {
+    Linking.openURL('https://www.saramin.co.kr/zf_user/?srsltid=AfmBOoowYzxYmkQl7PtfwcoHLCYLGlB9A9ujJhnYtjHuFOi4POxwSlfp');
+  };
 
   const renderJobCard = (item) => (
     <View style={styles.jobCard}>
-      <Image source={item.image} style={styles.jobImage} />
       <View style={styles.ddayBadge}>
         <Text style={styles.ddayText}>{item.dday}</Text>
       </View>
@@ -71,6 +70,22 @@ export default function CompanyJobsScreen() {
     </View>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Logo />
+          <TouchableOpacity onPress={() => navigation.navigate('Setting')} style={styles.headerIcons}>
+            <Ionicons name="settings-outline" size={20} color="#111" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>기업 정보를 불러오는 중...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* 헤더 */}
@@ -81,28 +96,14 @@ export default function CompanyJobsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* 중소기업 */}
+      <ScrollView contentContainerStyle={{ paddingBottom: 90 }}>
+        {/* 추천 기업 */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>중소기업 채용정보</Text>
+            <Text style={styles.sectionTitle}>추천 기업</Text>
           </View>
           <FlatList
-            data={jobData.smes}
-            horizontal
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => renderJobCard(item)}
-            showsHorizontalScrollIndicator={false}
-          />
-        </View>
-
-        {/* 대기업 */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>대기업 채용정보</Text>
-          </View>
-          <FlatList
-            data={jobData.large}
+            data={companies}
             horizontal
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => renderJobCard(item)}
@@ -111,7 +112,7 @@ export default function CompanyJobsScreen() {
         </View>
 
         {/* 사람인 버튼 */}
-        <TouchableOpacity style={styles.saraminCard}>
+        <TouchableOpacity style={styles.saraminCard} onPress={handleSaraminPress}>
           <View style={{ flex: 1 }}>
             <Text style={styles.saraminTitle}>사람인 채용정보</Text>
             <Text style={styles.saraminDesc}>채용 정보 포털</Text>
@@ -162,10 +163,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e5e7eb',
     overflow: 'hidden',
-  },
-  jobImage: {
-    width: '100%',
-    height: 120,
   },
   ddayBadge: {
     position: 'absolute',
@@ -236,5 +233,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
   },
 });

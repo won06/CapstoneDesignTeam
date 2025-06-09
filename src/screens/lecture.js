@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  ScrollView,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import Logo from '../components/Logo';
@@ -63,66 +63,71 @@ export default function LectureScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Logo />
-        <TouchableOpacity onPress={() => navigation.navigate('Setting')}>
-          <Ionicons name="settings-outline" size={20} color="#111" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Logo />
+          <TouchableOpacity onPress={() => navigation.navigate('Setting')}>
+            <Ionicons name="settings-outline" size={20} color="#111" />
+          </TouchableOpacity>
+        </View>
 
-      {/* Page Title */}
-      <Text style={styles.pageTitle}>강의</Text>
-      <Text style={styles.subtitle}>
-        AI/소프트웨어 분야에서 추천하는 강의 목록입니다.
-      </Text>
+        {/* Page Title */}
+        <Text style={styles.pageTitle}>강의</Text>
+        <Text style={styles.subtitle}>
+          AI/소프트웨어 분야에서 추천하는 강의 목록입니다.
+        </Text>
 
-      {/* 강의 리스트 */}
-      <FlatList
-        data={courses}
-        keyExtractor={(item) => (item.course_id ? item.course_id.toString() : (item.id ? item.id.toString() : Math.random().toString()))}
-        contentContainerStyle={{ paddingBottom: 80 }}
-        style={{ flex: 1, marginBottom: 64 }}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Ionicons name="book" size={28} color="#60a5fa" />
-              <Feather name="star" size={20} color="#ccc" />
-            </View>
-            <Text style={styles.cardTitle}>{getKoreanTitle(item.title || item.course_name)}</Text>
-            <Text style={styles.organization}>{item.type}</Text>
-            <Text style={styles.cardDesc}>{item.description || ''}</Text>
-            <View style={styles.tagsContainer}>
-              {/* 선수과목 태그 스타일로 표시 */}
-              {Array.isArray(item.prereqs) && item.prereqs.length > 0 && (
-                <View style={styles.prereqTagContainer}>
-                  <Text style={styles.prereqLabel}>선수과목:</Text>
-                  <View style={styles.prereqTagRow}>
-                    {item.prereqs.map((prereq, idx) => (
-                      <View key={idx} style={styles.prereqTag}>
-                        <Text style={styles.prereqTagText}>{prereq}</Text>
-                      </View>
-                    ))}
+        {/* 강의 리스트 */}
+        <FlatList
+          data={courses}
+          keyExtractor={(item) => (item.course_id ? item.course_id.toString() : (item.id ? item.id.toString() : Math.random().toString()))}
+          contentContainerStyle={{ paddingBottom: 90 }}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <Ionicons name="book" size={28} color="#60a5fa" />
+                <Feather name="star" size={20} color="#ccc" />
+              </View>
+              <Text style={styles.cardTitle}>{getKoreanTitle(item.title || item.course_name)}</Text>
+              <Text style={styles.organization}>{item.type}</Text>
+              <Text style={styles.cardDesc}>{item.description || ''}</Text>
+              <View style={styles.tagsContainer}>
+                {/* 선수과목 태그 스타일로 표시 */}
+                {Array.isArray(item.prereqs) && item.prereqs.length > 0 && (
+                  <View style={styles.prereqTagContainer}>
+                    <Text style={styles.prereqLabel}>선수과목:</Text>
+                    <View style={styles.prereqTagRow}>
+                      {item.prereqs.map((prereq, idx) => (
+                        <View key={idx} style={styles.prereqTag}>
+                          <Text style={styles.prereqTagText}>{prereq}</Text>
+                        </View>
+                      ))}
+                    </View>
                   </View>
-                </View>
-              )}
+                )}
+              </View>
             </View>
-          </View>
-        )}
-      />
-    </View>
+          )}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 80,
+    paddingBottom: 90, // 네비게이션 바 높이 + 여유 공간
   },
   header: {
     flexDirection: 'row',
