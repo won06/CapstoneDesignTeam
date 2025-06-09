@@ -12,6 +12,7 @@ import Logo from '../components/Logo';
 import { Ionicons } from '@expo/vector-icons';
 import { getFieldIdByName } from '../fields';
 import { getCourseIdByName } from '../courses';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const categories = [
   { title: '개론', courses: ['전자AI시스템공학개론','AI소프트웨어개론'] },
@@ -99,9 +100,12 @@ export default function CourseSelectionScreen({ navigation, route }) {
             selectedCourses.length > 0 ? styles.nextBtnActive : styles.nextBtnDisabled,
           ]}
           disabled={selectedCourses.length === 0}
-          onPress={() => {
+          onPress={async () => {
+            // 선택한 과목들을 AsyncStorage에 저장
+            await AsyncStorage.setItem('selectedCourses', JSON.stringify(selectedCourses));
+            
             if (fromJob) {
-              navigation.navigate('Job');
+              navigation.navigate('SelectJob');
             } else if (fromJob12) {
               navigation.navigate('Job12', { selectedCourses });
             } else {

@@ -44,12 +44,45 @@ export default function LectureScreen({ navigation }) {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const user_id = await AsyncStorage.getItem('user_id');
-      if (!user_id) return;
-      const res = await fetch(`http://192.168.45.78:3001/api/recommend/result?user_id=${user_id}`);
-      if (!res.ok) return;
-      const data = await res.json();
-      setCourses(data.courses || []);
+      try {
+        const user_id = await AsyncStorage.getItem('user_id');
+        if (!user_id) return;
+
+        // 이미 들은 수업 목록 가져오기
+        const selectedCoursesStr = await AsyncStorage.getItem('selectedCourses');
+        const selectedCourses = selectedCoursesStr ? JSON.parse(selectedCoursesStr) : [];
+        
+        console.log('Selected courses:', selectedCourses); // 디버깅용
+
+        // 추천 강의 가져오기
+        const res = await fetch(`http://192.168.45.78:3001/api/recommend/result?user_id=${user_id}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        console.log('Received courses:', data.courses); // 디버깅용
+
+        // 이미 들은 수업 필터링
+        const filteredCourses = (data.courses || []).filter(course => {
+          if (!course) return false;
+          
+          // 과목명 정규화 (괄호와 공백 제거)
+          const courseName = getKoreanTitle(course.course_name || course.title || '').trim();
+          const normalizedSelectedCourses = selectedCourses.map(sc => getKoreanTitle(sc).trim());
+          
+          // 디버깅용
+          console.log('Comparing:', {
+            courseName,
+            isIncluded: normalizedSelectedCourses.includes(courseName)
+          });
+          
+          return courseName && !normalizedSelectedCourses.includes(courseName);
+        });
+
+        console.log('Filtered courses:', filteredCourses); // 디버깅용
+        setCourses(filteredCourses);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
     };
     fetchCourses();
   }, []);

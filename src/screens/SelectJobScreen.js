@@ -32,23 +32,91 @@ export default function SelectJobScreen({ navigation }) {
 
   const handleSelectJob = async (job) => {
     try {
+      // 1. 선택한 직업 저장
       await AsyncStorage.setItem('selectedJob', JSON.stringify(job));
+      
+      // 2. 필요한 데이터 가져오기
       const user_id = await AsyncStorage.getItem('user_id');
-      // 추천 생성 요청: user_id와 career_id를 보냄
-      await fetch(`${API_URL}/recommend`, {
+      if (!user_id) {
+        throw new Error('사용자 정보를 찾을 수 없습니다.');
+      }
+      
+      const selectedCourses = JSON.parse(await AsyncStorage.getItem('selectedCourses') || '[]');
+      console.log('Selected Courses:', selectedCourses);
+      
+      // 3. 추천 생성 요청
+      console.log('Sending request with:', { user_id, career_id: job.career_id, selectedCourses });
+      
+      const recommendResponse = await fetch(`${API_URL}/recommend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id, career_id: job.career_id })
+        body: JSON.stringify({ 
+          user_id, 
+          career_id: job.career_id,
+          selectedCourses
+        })
       });
-      // 적성검사 완료 플래그 업데이트
-      await fetch(`${API_URL}/user/complete-test`, {
+
+      const responseText = await recommendResponse.text();
+      console.log('Server Response:', responseText);
+
+      if (!recommendResponse.ok) {
+        throw new Error(`추천 생성 실패: ${responseText}`);
+      }
+
+      let recommendData;
+      try {
+        recommendData = JSON.parse(responseText);
+        console.log('Parsed recommend data:', recommendData);
+      } catch (e) {
+        throw new Error('서버 응답을 파싱할 수 없습니다.');
+      }
+
+      // 4. 추천 데이터 유효성 검사
+      if (!recommendData) {
+        throw new Error('추천 데이터가 없습니다.');
+      }
+
+      // courses 배열이 없는 경우 빈 배열로 초기화
+      if (!recommendData.courses) {
+        recommendData.courses = [];
+      }
+
+      // 이미 선택한 과목들을 제외한 추천 데이터 필터링
+      const filteredRecommendData = {
+        ...recommendData,
+        courses: recommendData.courses.filter(course => {
+          if (!course) return false;
+          const courseName = course.course_name || course.title;
+          // 과목 이름이 없는 경우 제외
+          if (!courseName) return false;
+          // 선택한 과목 목록에 없는 과목만 포함
+          return !selectedCourses.includes(courseName);
+        })
+      };
+
+      console.log('Filtered recommend data:', filteredRecommendData);
+
+      // 필터링된 추천 데이터 저장
+      await AsyncStorage.setItem('recommendData', JSON.stringify(filteredRecommendData));
+
+      // 5. 적성검사 완료 플래그 업데이트
+      const completeResponse = await fetch(`${API_URL}/user/complete-test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id })
       });
+
+      if (!completeResponse.ok) {
+        const completeText = await completeResponse.text();
+        throw new Error(`적성검사 완료 상태 업데이트 실패: ${completeText}`);
+      }
+
+      // 6. 모든 처리가 성공적으로 완료되면 메인 화면으로 이동
       navigation.navigate('MainTabs');
-    } catch (e) {
-      alert('직업 저장 또는 추천 생성에 실패했습니다.');
+    } catch (error) {
+      console.error('Error in handleSelectJob:', error);
+      alert(`오류가 발생했습니다: ${error.message}\n다시 시도해주세요.`);
     }
   };
 
