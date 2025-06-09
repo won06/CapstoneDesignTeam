@@ -1,112 +1,89 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Button, Platform } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, Platform } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CommonActions } from '@react-navigation/native';
 
-// API URL 수정
-const API_URL = 'http://192.168.45.78:3001';
+// API URL 설정
+const API_URL = 'http://192.168.45.78:3001/api';
 
 export default function SettingScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleWithdraw = () => {
-    setModalVisible(true);
-  };
+  const goToLogin = useCallback(() => {
+    console.log('로그인 화면으로 이동 시도...');
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Login',
+          },
+        ],
+      })
+    );
+  }, [navigation]);
 
-  const handleConfirm = async () => {
-    if (isLoading) return; // 중복 실행 방지
+  const handleWithdraw = useCallback(() => {
+    setModalVisible(true);
+  }, []);
+
+  const handleConfirm = useCallback(async () => {
+    if (isLoading) return;
     setIsLoading(true);
     setModalVisible(false);
 
     try {
+      console.log('회원 탈퇴 처리 시작...');
       const user_id = await AsyncStorage.getItem('user_id');
-      console.log('[회원 탈퇴] 시작 - user_id:', user_id);
-      
       if (!user_id) {
         Alert.alert('오류', '로그인 정보가 없습니다.');
         return;
       }
 
-      // 1. 먼저 추천 데이터 삭제
-      console.log('[회원 탈퇴] 추천 데이터 삭제 시도');
-      const recommendResponse = await fetch(`${API_URL}/recommend/delete`, {
+      console.log('회원 탈퇴 API 호출...');
+      const userResponse = await fetch(`${API_URL}/user/delete`, {
         method: 'DELETE',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ user_id })
-      });
-      console.log('[회원 탈퇴] 추천 데이터 삭제 응답:', recommendResponse.status);
-
-      if (!recommendResponse.ok) {
-        const errorData = await recommendResponse.json().catch(() => ({}));
-        console.log('[회원 탈퇴] 추천 데이터 삭제 실패:', errorData);
-        throw new Error(errorData.message || '추천 데이터 삭제 중 오류가 발생했습니다.');
-      }
-
-      // 2. 사용자 데이터 삭제
-      console.log('[회원 탈퇴] 사용자 데이터 삭제 시도');
-      const userResponse = await fetch(`${API_URL}/api/user/delete`, {
-        method: 'DELETE',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id })
       });
 
-      console.log('[회원 탈퇴] 사용자 데이터 삭제 응답:', userResponse.status);
-      
       if (!userResponse.ok) {
-        const errorData = await userResponse.json().catch(() => ({}));
-        console.log('[회원 탈퇴] 에러 데이터:', errorData);
-        throw new Error(errorData.message || '회원 탈퇴 처리 중 오류가 발생했습니다.');
+        throw new Error('회원 탈퇴 처리 중 오류가 발생했습니다.');
       }
 
-      const data = await userResponse.json();
-      console.log('[회원 탈퇴] 성공 응답:', data);
-
-      // 3. 로컬 데이터 삭제
-      console.log('[회원 탈퇴] 로컬 데이터 삭제 시도');
+      console.log('로컬 데이터 삭제 중...');
       await AsyncStorage.clear();
-      console.log('[회원 탈퇴] 로컬 데이터 삭제 완료');
+      console.log('로컬 데이터 삭제 완료');
 
-      // 4. 로그인 화면으로 이동
-      Alert.alert(
-        '탈퇴 완료',
-        '회원 탈퇴가 완료되었습니다.',
-        [
-          {
-            text: '확인',
-            onPress: () => {
-              console.log('[회원 탈퇴] 로그인 화면으로 이동');
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-              });
-            }
-          }
-        ],
-        { cancelable: false }
-      );
+      goToLogin();
+
+      setTimeout(() => {
+        Alert.alert(
+          '탈퇴 완료',
+          '회원 탈퇴가 완료되었습니다.',
+          [{ text: '확인' }],
+          { cancelable: false }
+        );
+      }, 100);
+
     } catch (err) {
-      console.error('[회원 탈퇴] 오류 발생:', err);
-      Alert.alert(
-        '오류',
-        err.message || '네트워크 오류 또는 서버 오류가 발생했습니다.',
-        [{ text: '확인' }],
-        { cancelable: false }
-      );
+      console.error('회원 탈퇴 중 오류:', err);
+      Alert.alert('오류', err.message || '네트워크 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLoading, goToLogin]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setModalVisible(false);
-  };
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    await AsyncStorage.clear();
+    goToLogin();
+  }, [goToLogin]);
 
   return (
     <View style={styles.container}>
@@ -116,7 +93,7 @@ export default function SettingScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>설정</Text>
-        <View style={{ width: 28 }} /> {/* 오른쪽 여백용 */}
+        <View style={{ width: 28 }}><Text> </Text></View>
       </View>
 
       {/* 메뉴 리스트 */}
@@ -126,14 +103,14 @@ export default function SettingScreen({ navigation }) {
           <Text style={styles.menuText}>직업재검색</Text>
           <Ionicons name="chevron-forward" size={20} color="#bbb" style={styles.menuArrow} />
         </TouchableOpacity>
-        <View style={styles.separator} />
+        <View style={styles.separator}><Text> </Text></View>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
           <MaterialIcons name="logout" size={22} color="#ef4444" style={styles.menuIcon} />
           <Text style={[styles.menuText, { color: '#ef4444' }]}>로그아웃</Text>
           <Ionicons name="chevron-forward" size={20} color="#bbb" style={styles.menuArrow} />
         </TouchableOpacity>
-        <View style={styles.separator} />
+        <View style={styles.separator}><Text> </Text></View>
 
         <TouchableOpacity 
           style={styles.menuItem} 
@@ -146,21 +123,26 @@ export default function SettingScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* 커스텀 모달 */}
-      {modalVisible && (
+      {/* 탈퇴 확인 모달 */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={handleCancel}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>정말로 탈퇴하시겠습니까?</Text>
             <View style={styles.modalButtonRow}>
               <TouchableOpacity 
-                style={styles.modalButton} 
+                style={[styles.modalButton, { backgroundColor: '#ef4444' }]} 
                 onPress={handleConfirm}
                 disabled={isLoading}
               >
                 <Text style={styles.modalButtonText}>예</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.modalButton, styles.modalButtonCancel]} 
+                style={[styles.modalButton, { backgroundColor: '#e5e7eb' }]} 
                 onPress={handleCancel}
                 disabled={isLoading}
               >
@@ -169,99 +151,97 @@ export default function SettingScreen({ navigation }) {
             </View>
           </View>
         </View>
-      )}
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-    backgroundColor: '#fff',
+    borderBottomColor: '#eee',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#222',
   },
   menuList: {
-    marginTop: 24,
+    paddingTop: 12,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 18,
-    backgroundColor: '#fff',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
   },
   menuIcon: {
-    marginRight: 16,
+    marginRight: 12,
   },
   menuText: {
-    fontSize: 16,
     flex: 1,
+    fontSize: 16,
     color: '#222',
   },
   menuArrow: {
-    marginLeft: 8,
+    marginLeft: 'auto',
   },
   separator: {
     height: 1,
-    backgroundColor: '#f3f4f6',
-    marginLeft: 62,
+    backgroundColor: '#eee',
+    marginLeft: 20,
   },
   modalOverlay: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 100,
   },
   modalBox: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 28,
-    alignItems: 'center',
-    width: 320,
+    padding: 24,
+    width: '80%',
+    maxWidth: 320,
+    elevation: 5,
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 24,
+    color: '#222',
     textAlign: 'center',
+    marginBottom: 24,
   },
   modalButtonRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
+    justifyContent: 'space-between',
+    gap: 12,
   },
   modalButton: {
-    backgroundColor: '#2979ff',
+    flex: 1,
+    padding: 12,
     borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 32,
-    marginHorizontal: 8,
-  },
-  modalButtonCancel: {
-    backgroundColor: '#f3f4f6',
+    alignItems: 'center',
   },
   modalButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });

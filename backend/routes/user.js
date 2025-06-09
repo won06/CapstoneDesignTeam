@@ -103,13 +103,8 @@ router.delete('/delete', async (req, res) => {
     await connection.query('DELETE FROM user_recommended_courses WHERE user_id = ?', [user_id]);
     console.log('[회원 탈퇴] 추천 데이터 삭제 완료');
 
-    // 3. 사용자 데이터 삭제
-    const [userResult] = await connection.query('DELETE FROM users WHERE user_id = ?', [user_id]);
+    await connection.query('DELETE FROM users WHERE user_id = ?', [user_id]);
     
-    if (userResult.affectedRows === 0) {
-      throw new Error('사용자를 찾을 수 없습니다.');
-    }
-    console.log('[회원 탈퇴] 사용자 데이터 삭제 완료');
 
     await connection.commit();
     res.json({ message: '회원 탈퇴가 완료되었습니다.' });

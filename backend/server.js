@@ -16,7 +16,7 @@ const userRouter = require('./routes/user');
 const recommendRouter = require('./routes/recommend');
 app.use('/api/careers', careersRouter);
 app.use('/api/user', userRouter);
-app.use('/recommend', recommendRouter);
+app.use('/api/recommend', recommendRouter);
 
 // MySQL 연결 설정
 const pool = mysql.createPool({

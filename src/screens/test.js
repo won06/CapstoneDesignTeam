@@ -140,7 +140,7 @@ export default function AssessmentScreen({ navigation }) {
           disabled={!grade || !jobStatus}
           onPress={() => {
             if (jobStatus === '있음') {
-              navigation.navigate('SelectJob');
+              navigation.navigate('Test2', { fromJob: true });
             } else {
               navigation.navigate('Test2', { fromJob12: true });
             }
