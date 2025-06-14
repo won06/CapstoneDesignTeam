@@ -29,19 +29,9 @@ export default function CredentialScreen({ navigation }) {
 
   const fetchCertificates = async () => {
     try {
-      // 추천 직업 id 기반 자격증 추천
-      const selectedJob = await AsyncStorage.getItem('selectedJob');
-      let careerId = null;
-      if (selectedJob) {
-        const jobObj = JSON.parse(selectedJob);
-        careerId = jobObj.career_id;
-      }
-      // careerId가 있으면 해당 careerId로 자격증 추천 fetch
-      let url = `${API_URL}/recommend/result`;
-      if (careerId) {
-        url += `?career_id=${careerId}`;
-      }
-      const response = await fetch(url);
+      const user_id = await AsyncStorage.getItem('user_id');
+      if (!user_id) return;
+      const response = await fetch(`${API_URL}/recommend/result?user_id=${user_id}`);
       if (response.ok) {
         const data = await response.json();
         // 자격증 데이터 가공
