@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db'); // mysql2/promise 커넥션
+const { spawn } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 
 const PREREQ_MAP = {
   "머신러닝을위한선형대수": ["AI융합기초수학"],
@@ -85,6 +89,12 @@ const PREREQ_MAP = {
 // 과목명에서 괄호와 괄호 안 영어 제거 함수
 function getKoreanTitle(title) {
   return title ? title.replace(/\s*\([^)]*\)/g, '').trim() : '';
+}
+
+function writeTempJson(data) {
+  const tmpPath = path.join(os.tmpdir(), `recomm_input_${Date.now()}_${Math.random()}.json`);
+  fs.writeFileSync(tmpPath, JSON.stringify(data), 'utf8');
+  return tmpPath;
 }
 
 // 추천 API (분야+과목 기반)
@@ -302,6 +312,68 @@ router.delete('/delete', async (req, res) => {
   } catch (err) {
     console.error('추천 데이터 삭제 중 오류:', err);
     res.status(500).json({ error: '추천 데이터 삭제 중 오류가 발생했습니다.' });
+  }
+});
+
+const recommenderPath = path.join(__dirname, '../algorithms/keyword_based_recommender.py');
+
+// 키워드 기반 직업 추천 (과목 → 직업)
+router.post('/career', async (req, res) => {
+  try {
+    const { courses, target_id } = req.body;
+    const [coursesData] = await db.query('SELECT course_id, title, description FROM courses');
+    const [careersData] = await db.query('SELECT career_id, job_name, summary FROM careers');
+    const input = {
+      courses: coursesData,
+      careers: careersData,
+      target_id,
+      mode: 'course_to_career'
+    };
+    const inputPath = writeTempJson(input);
+    const py = spawn('python', [recommenderPath, inputPath]);
+    let result = '';
+    py.stdout.on('data', (data) => { result += data; });
+    py.stderr.on('data', (data) => { console.error('PYTHON ERROR:', data.toString()); });
+    py.on('close', () => {
+      fs.unlinkSync(inputPath);
+      try {
+        res.json(JSON.parse(result));
+      } catch (e) {
+        res.status(500).json({ error: '파이썬 결과 파싱 오류', details: result });
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: '직업 추천 처리 중 오류', details: err.message });
+  }
+});
+
+// 키워드 기반 과목 추천 (직업 → 과목)
+router.post('/course', async (req, res) => {
+  try {
+    const { careers, target_id } = req.body;
+    const [coursesData] = await db.query('SELECT course_id, title, description FROM courses');
+    const [careersData] = await db.query('SELECT career_id, job_name, summary FROM careers');
+    const input = {
+      courses: coursesData,
+      careers: careersData,
+      target_id,
+      mode: 'career_to_course'
+    };
+    const inputPath = writeTempJson(input);
+    const py = spawn('python', [recommenderPath, inputPath]);
+    let result = '';
+    py.stdout.on('data', (data) => { result += data; });
+    py.stderr.on('data', (data) => { console.error('PYTHON ERROR:', data.toString()); });
+    py.on('close', () => {
+      fs.unlinkSync(inputPath);
+      try {
+        res.json(JSON.parse(result));
+      } catch (e) {
+        res.status(500).json({ error: '파이썬 결과 파싱 오류', details: result });
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: '과목 추천 처리 중 오류', details: err.message });
   }
 });
 

@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const app = express();
 
+
 // 미들웨어 설정
 app.use(cors());
 app.use(express.json());
@@ -14,13 +15,19 @@ app.use(express.urlencoded({ extended: true }));
 const careersRouter = require('./routes/careers');
 const userRouter = require('./routes/user');
 const recommendRouter = require('./routes/recommend');
+const companiesRouter = require('./routes/company');
+const coursesRouter = require('./routes/courses');
+const curriculumRouter = require('./routes/curriculum');
 app.use('/api/careers', careersRouter);
 app.use('/api/user', userRouter);
 app.use('/api/recommend', recommendRouter);
+app.use('/api/companies', companiesRouter);
+app.use('/api/courses', coursesRouter);
+app.use('/api/curriculum', curriculumRouter);
 
 // MySQL 연결 설정
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST || '127.0.0.1',
   user: process.env.DB_USER || 'root',
   password: 'dlrbgus123@',
   database: 'capstone_test_db4',
@@ -28,6 +35,7 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
+
 
 // 연결 테스트
 pool.getConnection((err, connection) => {
@@ -46,6 +54,6 @@ app.get('/', (req, res) => {
 
 // 서버 시작
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
 }); 

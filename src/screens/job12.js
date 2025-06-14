@@ -77,27 +77,22 @@ export default function Job12({ navigation, route }) {
       : [];
 
     try {
-      // 직업 추천 요청
-      const recommendRes = await fetch('http://192.168.45.78:3001/api/recommend', {
+      // keyword_based_recommender 기반 직업 추천 요청
+      const recommendRes = await fetch('http://192.168.45.78:3001/api/recommend/career', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id,
-          selected_fields: selectedFieldIds,
-          selected_courses: selectedCourseIds
+          courses: selectedCourseIds, // 선택한 과목 id 배열
+          target_id: selectedCourseIds[0] || null // 대표 과목 id (첫 번째)
         })
       });
       const recommendData = await recommendRes.json();
       
       if (recommendRes.ok) {
-        // 추천된 직업과 기업 정보 저장
-        if (recommendData.recommended_careers && recommendData.recommended_careers.length > 0) {
-          await AsyncStorage.setItem('selectedJob', JSON.stringify(recommendData.recommended_careers[0]));
+        // 추천된 직업 정보 저장 (recommendations 배열의 첫 번째 직업 id)
+        if (recommendData.recommendations && recommendData.recommendations.length > 0) {
+          await AsyncStorage.setItem('selectedJob', JSON.stringify({ career_id: recommendData.recommendations[0] }));
         }
-        if (recommendData.recommended_companies && recommendData.recommended_companies.length > 0) {
-          await AsyncStorage.setItem('recommendedCompanies', JSON.stringify(recommendData.recommended_companies));
-        }
-        
         // 적성검사 완료 플래그 업데이트
         const completeRes = await fetch('http://192.168.45.78:3001/api/user/complete-test', {
           method: 'POST',

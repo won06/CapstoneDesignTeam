@@ -32,26 +32,24 @@ export default function CareerRecommendationScreen({ navigation }) {
   const fetchRecommendedCareers = async () => {
     setLoading(true);
     try {
-      const user_id = await AsyncStorage.getItem('user_id');
-      if (!user_id) throw new Error('로그인 정보가 없습니다.');
-
-      // 1. 추천 생성(최초 1회만 필요, 이미 생성된 경우 생략 가능)
-      await fetch(`${API_URL}/recommend`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id }),
-      });
-
-      // 2. 추천 결과 조회
-      const response = await fetch(`${API_URL}/recommend/result?user_id=${user_id}`);
-      if (!response.ok) {
-        throw new Error('추천 결과를 불러오는데 실패했습니다.');
+      // AsyncStorage에서 추천 직업 불러오기
+      const selectedJob = await AsyncStorage.getItem('selectedJob');
+      let careersArr = [];
+      if (selectedJob) {
+        const jobObj = JSON.parse(selectedJob);
+        // career_id만 저장되어 있을 수 있으므로, 필요한 경우 추가 정보 fetch 필요
+        if (jobObj.career_id) {
+          // 서버에서 해당 career_id의 상세 정보 fetch
+          const response = await fetch(`${API_URL}/careers/${jobObj.career_id}`);
+          if (response.ok) {
+            const data = await response.json();
+            careersArr = [data];
+          }
+        } else if (Array.isArray(jobObj)) {
+          careersArr = jobObj;
+        }
       }
-      const data = await response.json();
-      setCareers(data.careers || []);
-      // 강의 추천 관련 UI 및 상태 제거
-      // setCourses(data.courses || []); // courses 상태 제거
-      // 강의 추천 FlatList 및 텍스트 제거
+      setCareers(careersArr);
       setLoading(false);
     } catch (err) {
       setError(err.message);

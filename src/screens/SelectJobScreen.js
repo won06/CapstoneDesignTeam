@@ -44,16 +44,13 @@ export default function SelectJobScreen({ navigation }) {
       const selectedCourses = JSON.parse(await AsyncStorage.getItem('selectedCourses') || '[]');
       console.log('Selected Courses:', selectedCourses);
       
-      // 3. 추천 생성 요청
-      console.log('Sending request with:', { user_id, career_id: job.career_id, selectedCourses });
-      
-      const recommendResponse = await fetch(`${API_URL}/recommend`, {
+      // 3. keyword_based_recommender 기반 과목 추천 요청
+      const recommendResponse = await fetch(`${API_URL}/recommend/course`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          user_id, 
-          career_id: job.career_id,
-          selectedCourses
+        body: JSON.stringify({
+          careers: [job.career_id],
+          target_id: job.career_id
         })
       });
 
@@ -77,28 +74,24 @@ export default function SelectJobScreen({ navigation }) {
         throw new Error('추천 데이터가 없습니다.');
       }
 
-      // courses 배열이 없는 경우 빈 배열로 초기화
-      if (!recommendData.courses) {
-        recommendData.courses = [];
+      // recommendations 배열이 없는 경우 빈 배열로 초기화
+      if (!recommendData.recommendations) {
+        recommendData.recommendations = [];
       }
 
       // 이미 선택한 과목들을 제외한 추천 데이터 필터링
       const filteredRecommendData = {
         ...recommendData,
-        courses: recommendData.courses.filter(course => {
-          if (!course) return false;
-          const courseName = course.course_name || course.title;
-          // 과목 이름이 없는 경우 제외
-          if (!courseName) return false;
-          // 선택한 과목 목록에 없는 과목만 포함
-          return !selectedCourses.includes(courseName);
+        recommendations: recommendData.recommendations.filter(courseId => {
+          // 선택한 과목 목록에 없는 과목만 포함 (courseId가 이름이 아닌 id임에 주의)
+          return !selectedCourses.includes(courseId);
         })
       };
 
       console.log('Filtered recommend data:', filteredRecommendData);
 
       // 필터링된 추천 데이터 저장
-      await AsyncStorage.setItem('recommendData', JSON.stringify(filteredRecommendData));
+      await AsyncStorage.setItem('recommendCourses', JSON.stringify(filteredRecommendData.recommendations));
 
       // 5. 적성검사 완료 플래그 업데이트
       const completeResponse = await fetch(`${API_URL}/user/complete-test`, {

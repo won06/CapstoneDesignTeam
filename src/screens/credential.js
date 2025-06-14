@@ -29,10 +29,19 @@ export default function CredentialScreen({ navigation }) {
 
   const fetchCertificates = async () => {
     try {
-      const user_id = await AsyncStorage.getItem('user_id');
-      if (!user_id) return;
-
-      const response = await fetch(`${API_URL}/recommend/result?user_id=${user_id}`);
+      // 추천 직업 id 기반 자격증 추천
+      const selectedJob = await AsyncStorage.getItem('selectedJob');
+      let careerId = null;
+      if (selectedJob) {
+        const jobObj = JSON.parse(selectedJob);
+        careerId = jobObj.career_id;
+      }
+      // careerId가 있으면 해당 careerId로 자격증 추천 fetch
+      let url = `${API_URL}/recommend/result`;
+      if (careerId) {
+        url += `?career_id=${careerId}`;
+      }
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         // 자격증 데이터 가공
@@ -134,8 +143,8 @@ export default function CredentialScreen({ navigation }) {
       <FlatList
         data={certificates}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 100 }}
-        style={{ flex: 1, marginBottom: 80 }}
+        contentContainerStyle={{ paddingBottom: 80 }}
+        style={{ flex: 1, marginBottom: 64 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <>
@@ -143,7 +152,6 @@ export default function CredentialScreen({ navigation }) {
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
                   <Ionicons name={item.icon} size={28} color="#60a5fa" />
-                  <Feather name="star" size={20} color="#ccc" />
                 </View>
                 <Text style={styles.cardTitle}>{item.title}</Text>
                 <Text style={styles.organization}>{item.organization}</Text>
@@ -160,12 +168,12 @@ export default function CredentialScreen({ navigation }) {
             </TouchableOpacity>
             {/* 마지막 자격증 카드 아래에 큐넷 카드 추가 */}
             {item.id === certificates[certificates.length - 1].id && (
-              <TouchableOpacity style={styles.cubeCard} onPress={handleQnetPress}>
+              <TouchableOpacity style={styles.saraminCard} onPress={handleQnetPress}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.cubeTitle}>큐넷 자격증</Text>
-                  <Text style={styles.cubeDesc}>국가기술자격 정보 포털</Text>
+                  <Text style={styles.saraminTitle}>큐넷 자격증</Text>
+                  <Text style={styles.saraminDesc}>국가기술자격 정보 포털</Text>
                 </View>
-                <View style={styles.cubeIconCircle}>
+                <View style={styles.saraminIconCircle}>
                   <Ionicons name="open-outline" size={28} color="#2563eb" />
                 </View>
               </TouchableOpacity>
@@ -382,41 +390,46 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#222',
   },
-  cubeCard: {
+  saraminCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#f6faff',
+    borderWidth: 2,
+    borderColor: '#c7e0ff',
+    borderRadius: 16,
     padding: 16,
-    borderRadius: 12,
-    marginHorizontal: 24,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 20,
+    shadowColor: '#c7e0ff',
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    width: '90%',
+    height: 80,
+    alignSelf: 'center',
   },
-  cubeTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
+  saraminTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#222e39',
     marginBottom: 4,
   },
-  cubeDesc: {
+  saraminDesc: {
     fontSize: 14,
     color: '#6b7280',
   },
-  cubeIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#eff6ff',
-    justifyContent: 'center',
+  saraminIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
     alignItems: 'center',
-    marginLeft: 16,
+    justifyContent: 'center',
+    shadowColor: '#c7e0ff',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
   loadingContainer: {
     flex: 1,
