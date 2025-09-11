@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import Logo from '../components/Logo';
 
 export default function SignupScreen({ navigation }) {
   const [name, setName] = useState('');
@@ -15,7 +16,7 @@ export default function SignupScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>eoyeongbujeong</Text>
+      <Logo style={{ marginBottom: 32 }} />
       <Text style={styles.title}>계정 만들기</Text>
       <Text style={styles.subtitle}>개인정보를 입력해주세요요</Text>
 

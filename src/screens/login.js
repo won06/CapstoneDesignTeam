@@ -1,12 +1,15 @@
-import React from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Linking, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Linking, Alert, Image } from 'react-native';
 import { FontAwesome, Feather, AntDesign, FontAwesome5 } from '@expo/vector-icons';
+import Logo from '../components/Logo';
 
 export default function App({ navigation }) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <View style={styles.container}>
       {/* 로고 */}
-      <Text style={styles.logo}>eoyeongbujeong</Text>
+      <Logo style={{ marginBottom: 32 }} />
 
       {/* 로그인 폼 */}
       <Text style={styles.loginTitle}>로그인</Text>
@@ -30,15 +33,17 @@ export default function App({ navigation }) {
           style={styles.input}
           placeholder="비밀번호"
           placeholderTextColor="#bdbdbd"
-          secureTextEntry
+          secureTextEntry={!showPassword}
         />
-        <Feather name="eye-off" size={20} color="#bdbdbd" style={styles.inputIconRight} />
+        <TouchableOpacity onPress={() => setShowPassword((prev) => !prev)}>
+          <Feather
+            name={showPassword ? 'eye' : 'eye-off'}
+            size={20}
+            color="#bdbdbd"
+            style={styles.inputIconRight}
+          />
+        </TouchableOpacity>
       </View>
-
-      {/* 비밀번호 찾기 */}
-      <TouchableOpacity style={styles.forgotBtn}>
-        <Text style={styles.forgotText}>비밀번호를 잊으셨나요?</Text>
-      </TouchableOpacity>
 
       {/* 로그인 버튼 */}
       <TouchableOpacity
@@ -110,14 +115,6 @@ const styles = StyleSheet.create({
   },
   inputIconRight: {
     marginLeft: 8,
-  },
-  forgotBtn: {
-    alignSelf: 'flex-end',
-    marginBottom: 16,
-  },
-  forgotText: {
-    color: '#2979ff',
-    fontSize: 13,
   },
   loginButton: {
     backgroundColor: '#2979ff',

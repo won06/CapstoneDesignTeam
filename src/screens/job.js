@@ -8,6 +8,8 @@ import {
   TextInput
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import Logo from '../components/Logo';
+import { Ionicons } from '@expo/vector-icons';
 
 const jobCategories = [
   { id: '1', title: 'AI 엔지니어', icon: 'cpu' },
@@ -26,7 +28,10 @@ export default function JobSelectionScreen({ navigation }) {
     <View style={styles.container}>
       {/* 상단 바 */}
       <View style={styles.header}>
-        <Text style={styles.logo}>eoyeongbujeong</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 8 }}>
+          <Ionicons name="arrow-back" size={24} color="#222" />
+        </TouchableOpacity>
+        <Logo />
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Feather name="x" size={24} color="#222" />
         </TouchableOpacity>
@@ -57,7 +62,9 @@ export default function JobSelectionScreen({ navigation }) {
               styles.categoryCard,
               selectedCategory === category.id && styles.selectedCategory
             ]}
-            onPress={() => setSelectedCategory(category.id)}
+            onPress={() => {
+              setSelectedCategory(category.id);
+            }}
           >
             <Feather
               name={category.icon}
@@ -83,7 +90,7 @@ export default function JobSelectionScreen({ navigation }) {
           selectedCategory ? styles.nextButtonActive : styles.nextButtonDisabled
         ]}
         disabled={!selectedCategory}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
       >
         <Text style={styles.nextText}>다음</Text>
       </TouchableOpacity>

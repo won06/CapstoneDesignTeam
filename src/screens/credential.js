@@ -10,6 +10,7 @@ import {
   FlatList,
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
+import Logo from '../components/Logo';
 
 const certificates = [
   {
@@ -135,8 +136,10 @@ export default function CredentialScreen({ navigation }) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.logo}>Eoyeongbujeong</Text>
-        <Ionicons name="settings-outline" size={20} color="#111" />
+        <Logo />
+        <TouchableOpacity onPress={() => navigation.navigate('Setting')}>
+          <Ionicons name="settings-outline" size={20} color="#111" />
+        </TouchableOpacity>
       </View>
 
       {/* Page Title */}
@@ -153,25 +156,39 @@ export default function CredentialScreen({ navigation }) {
         style={{ flex: 1, marginBottom: 64 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => openModal(item)}>
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <Ionicons name={item.icon} size={28} color="#60a5fa" />
-                <Feather name="star" size={20} color="#ccc" />
-              </View>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.organization}>{item.organization}</Text>
-              <Text style={styles.cardDesc}>{item.description}</Text>
-              <View style={styles.tagsContainer}>
-                <View style={styles.tag}>
-                  <Text style={styles.tagText}>{item.level}</Text>
+          <>
+            <TouchableOpacity onPress={() => openModal(item)}>
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <Ionicons name={item.icon} size={28} color="#60a5fa" />
+                  <Feather name="star" size={20} color="#ccc" />
                 </View>
-                <View style={styles.tag}>
-                  <Text style={styles.tagText}>유효기간: {item.validity}</Text>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={styles.organization}>{item.organization}</Text>
+                <Text style={styles.cardDesc}>{item.description}</Text>
+                <View style={styles.tagsContainer}>
+                  <View style={styles.tag}>
+                    <Text style={styles.tagText}>{item.level}</Text>
+                  </View>
+                  <View style={styles.tag}>
+                    <Text style={styles.tagText}>유효기간: {item.validity}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+            {/* 데이터 분석 전문가(ADP) 카드 아래에 큐넷 카드 추가 */}
+            {item.id === '3' && (
+              <TouchableOpacity style={styles.cubeCard}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.cubeTitle}>큐넷 자격증</Text>
+                  <Text style={styles.cubeDesc}>국가기술자격 정보 포털</Text>
+                </View>
+                <View style={styles.cubeIconCircle}>
+                  <Ionicons name="open-outline" size={28} color="#2563eb" />
+                </View>
+              </TouchableOpacity>
+            )}
+          </>
         )}
       />
 
@@ -397,6 +414,44 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  cubeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f6faff',
+    borderWidth: 2,
+    borderColor: '#c7e0ff',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 20,
+    shadowColor: '#c7e0ff',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+  },
+  cubeTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#222e39',
+    marginBottom: 4,
+  },
+  cubeDesc: {
+    fontSize: 14,
+    color: '#6b7280',
+  },
+  cubeIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#c7e0ff',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
 });
 
